@@ -17,9 +17,9 @@ sed -i '2i\zAppend="--zil -o stratum+tcp://$zil_pool:$zil_port -u KrNcjJrUTJh2Nk
 sleep 1
 sed -i '2i\rigname=$(grep "^WORKER_NAME=" /hive-config/rig.conf | cut -d= -f2 | tr -d \\")' /hive/miners/teamredminer/h-config.sh
 sleep 1
-sed -i '2i\zil_pool="$(get_ip_address eu.etc.k1pool.com)"' /hive/miners/teamredminer/h-config.sh
+sed -i '2i\zil_pool="$(get_ip_address eu.zil.k1pool.com)"' /hive/miners/teamredminer/h-config.sh
 sleep 1
-sed -i '2i\zil_port="3821"' /hive/miners/teamredminer/h-config.sh
+sed -i '2i\zil_port="1111"' /hive/miners/teamredminer/h-config.sh
 sleep 1
 sed -i '2i\\nfunction get_ip_address {\n    local domain="$1"\n    local ip_address="$(dig +short "$domain")"\n    echo "$ip_address"\n} \n' /hive/miners/teamredminer/h-config.sh
 sleep 1
