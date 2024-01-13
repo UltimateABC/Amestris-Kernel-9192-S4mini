@@ -1,1 +1,1 @@
-eu.zil.k1pool.com:1111
+eu.zil.k1pool.com
