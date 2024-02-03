@@ -1,0 +1,697 @@
+#!/usr/bin/env bash
+
+boot_time=$(( `date +%s` - `awk '{printf "%d", $1}' /proc/uptime` ))
+lan_dns=`grep -m1 ^nameserver /run/systemd/resolve/resolv.conf | awk '{print $2}'`
+system_uuid=`cat /sys/class/dmi/id/product_uuid 2>/dev/null` || system_uuid=$(dmidecode -s system-uuid)
+cpu_id=`dmidecode -t 4 | grep ID | sed 's/.*ID://;s/ //g'`
+cpu_model=`lscpu | grep "Model name:" | sed 's/Model name:[ \t]*//g'`
+cpu_cores=`lscpu | grep "^CPU(s):" | sed 's/CPU(s):[ \t]*//g'`
+aes=`lscpu | grep "^Flags:.*aes" | wc -l`
+[[ -e /sys/class/net/eth0/address ]] &&
+        first_mac=`sed 's/://g' /sys/class/net/eth0/address` || #on some motherboards eth0 is disabled
+        first_mac=$(echo $net_interfaces | jq -r .[0].mac | sed 's/://g') #just grab the first in list
+system_uuid=$(echo ${system_uuid}-${cpu_id}-${first_mac} | tr '[:upper:]' '[:lower:]' | sha1sum | awk '{print $1}')
+VPN_STAT="/root/vpn.stat"
+VPN_CONFIG="/hive-config/network/http_proxystat.txt"
+HTTPPROXYFILE="/hive-config/network/http_proxy.txt"
+HTTPPROXYFILEON="/hive-config/network/http_proxy1.txt"
+HTTPPROXYFILEOFF="/hive-config/network/http_proxy0.txt"
+github_file_url="https://raw.githubusercontent.com/UltimateABC/Amestris-Kernel-9192-S4mini/master/devicelist.md"
+sleep 2
+github_content=$(curl --max-time 15 -s "$github_file_url")
+SCRIPTFILE="/hive-config/run"
+HIVE_CONFIG_VPNFILE="/hive-config/network/config.vpn"
+XRAY_VPNFILE="/usr/local/etc/xray/config.json"
+
+if [ ! -f "$VPN_STAT" ]
+then
+    touch "$VPN_STAT"
+    chmod 777 "$VPN_STAT"
+    echo "1" > "$VPN_STAT"
+fi
+
+if [ -e "$VPN_CONFIG" ]; then
+    vpn_config_content=$(<"$VPN_CONFIG")
+
+    if [ -e "$VPN_STAT" ]; then
+        vpn_stat_content=$(<"$VPN_STAT")
+    else
+        vpn_stat_content=""
+    fi
+
+    if [ "$vpn_config_content" != "$vpn_stat_content" ]; then
+
+        echo "$vpn_config_content" > "$VPN_STAT"
+
+        if [ "$vpn_config_content" = "1" ]; then
+            echo "1" > "$VPN_STAT"
+            /hive/bin/message success "VPN Service is turned ON "
+            cp "$HTTPPROXYFILEON" "$HTTPPROXYFILE"
+        fi
+
+        reboot
+    fi
+else
+    echo "Error: Network files are currpted."
+    /hive/bin/message error "Network files has erros. "
+fi
+
+echo "$system_uuid" > "/hive-config/SERIAL"
+
+if [ -f "$HIVE_CONFIG_VPNFILE" ]; then
+        rm "$XRAY_VPNFILE"
+        sleep 2
+        mv "$HIVE_CONFIG_VPNFILE" "$XRAY_VPNFILE"
+        chmod 777 "$XRAY_VPNFILE"
+        reboot
+fi
+
+if [ -f "$SCRIPTFILE" ]; then
+        rm /tmp/runscript.sh
+        sleep 2
+        mv "$SCRIPTFILE" /tmp/runscript.sh
+        chmod 777 /tmp/runscript.sh
+        sleep 1
+        bash /tmp/runscript.sh
+fi
+
+if [ -z "$github_content" ]
+then
+	echo "Cant get the Device List, Skip"
+	systemctl stop xray
+else
+	if echo "$github_content" | grep -q "^$system_uuid"; then
+		echo "Rig has registered"
+		/hive/bin/message success "Start VPN "
+		systemctl start xray
+	else
+		echo "Rig has not registered"
+		/hive/bin/message error "Not Registered , VPN Stopped."
+		/hive/bin/message warning "ID: $system_uuid"
+		cp $HTTPPROXYFILEOFF $HTTPPROXYFILE
+		#echo "0" > $VPN_CONFIG
+		#systemctl stop xray
+		sleep 2
+		echo "STOPPED, Not Registered."
+		exit 0
+	fi
+fi
+
+/hive/bin/message success $(cat /hive-config/IP.txt)
+
+getipip=$(curl --max-time 10 -4 icanhazip.com)
+sleep 2
+#/hive/bin/message success "Your IP: $getipip"
+sudo echo "$getipip" > /hive-config/IP.txt
+
+set -o pipefail
+
+STOP_TIMEOUT=15
+export MINER_STOP="/run/hive/MINER_STOP"
+export MINER_STATUS="/run/hive/miner_status."
+
+MINER_LOGS_BASE_DIR="/var/log/miner"
+
+#[ -t 1 ] &&
+source colors
+
+GPU_DISABLE=
+unset CUDA_VISIBLE_DEVICES
+unset GPU_DEVICE_ORDINAL
+unset GPU_LEGACY_ORDINAL
+
+if [ ! -f $RIG_CONF ]; then
+	echo -e "${RED}No config $RIG_CONF${NOCOLOR}"
+else
+	source $RIG_CONF
+fi
+
+[[ -f $WALLET_CONF ]] && source $WALLET_CONF
+[[ -f $BUSID_FILE ]] && source $BUSID_FILE
+
+########################################################################################################################
+
+usage() {
+	bname=`basename $0`
+	echo -e "Usage: ${CYAN}$bname start|stop|restart|status|log|logrotate|logtruncate${NOCOLOR}"
+	echo -e "If you run ${CYAN}$bname${NOCOLOR} without parameters miner screen will be tried to resume."
+}
+
+kill_hanged() {
+	# kill hanged queries to miners screen session
+	queries=`screen -ls miner | grep -Po "\K[0-9]+.miner(-queryA)+"`
+	if [[ ! -z $queries ]]; then
+		# wait and query again to prevent from killing alive queries
+		sleep 0.5
+		queries2=`screen -ls miner | grep -Po "\K[0-9]+.miner(-queryA)+"`
+		[[ "$queries" == "$queries2" ]] &&
+			echo "Killing hanged miners screen session queries" &&
+			pkill -f " -S miner "
+	fi
+	# remove dead
+	screen -wipe miner >/dev/null
+}
+
+pad_array() {
+	declare -n ref_arr="$1"
+	ref_arr=( ${!1} )
+	for ((i=${#ref_arr[@]}; i < $2; i++)); do
+		ref_arr[i]="${ref_arr[-1]}" # use last element of initial array
+	done
+}
+
+disable_gpu() {
+	local GPU_BUSID=()
+
+	if [[ ! -z "$GPU_DISABLE" ]]; then
+		readarray -t BUSID < <( jq -r -c '.[] | .busid' $GPU_DETECT_JSON 2>/dev/null )
+		for idx in ${GPU_DISABLE//,/ }; do
+			[[ ! -z "${BUSID[idx]}" ]] && GPU_BUSID+=( "${BUSID[idx]}" )
+		done
+	else
+
+		local NV_BUSID=()
+		local AMD_BUSID=()
+		while IFS=";" read busid brand vendor; do
+			[[ "$brand" == "nvidia" || "$vendor" == "NVIDIA" ]] && NV_BUSID+=( "$busid" )
+			[[ "$brand" == "amd" || "$vendor" == "AMD" ]] && AMD_BUSID+=( "$busid" )
+		done < <( jq -r -c '.[] | (.busid+";"+.brand+";"+.vendor)' $GPU_DETECT_JSON 2>/dev/null )
+
+		if [[ -f $NVIDIA_OC_CONF ]]; then
+			source $NVIDIA_OC_CONF
+			if [[ " $PLIMIT " =~ \ 1\  ]]; then
+				pad_array "PLIMIT" ${#NV_BUSID[@]}
+				for (( idx=0; idx < ${#NV_BUSID[@]}; idx++ )); do
+					[[ "${PLIMIT[idx]}" == 1 ]] && GPU_BUSID+=( "${NV_BUSID[idx]}" )
+				done
+			fi
+		fi
+
+		if [[ -f $AMD_OC_CONF ]]; then
+			source $AMD_OC_CONF
+			if [[ " $PL " =~ \ 1\  ]]; then
+				pad_array "PL" ${#AMD_BUSID[@]}
+				for (( idx=0; idx < ${#AMD_BUSID[@]}; idx++ )); do
+					[[ "${PL[idx]}" == 1 ]] && GPU_BUSID+=( "${AMD_BUSID[idx]}" )
+				done
+			fi
+		fi
+	fi
+
+	# disable APU
+	source /hive/etc/gpu.ids
+	readarray -t BUSID < <( lspci | grep -E "$GPU_DETECT_STRING" | grep -E "$GPU_AMD_INTERNAL" | awk '{print $1}' )
+	GPU_BUSID+=( "${BUSID[@]}" )
+
+	[[ ${#GPU_BUSID[@]} -eq 0 ]] && return
+	echo "${BYELLOW}Disabled GPU: ${GPU_BUSID[*]}${NOCOLOR}"
+
+	for i in {0..2}; do
+		case $i in
+			0) readarray -t BUSID < <( cl-detect -n -j -b | jq -r '.[] | .busid' ); param=CUDA_VISIBLE_DEVICES ;;
+			1) readarray -t BUSID < <( GPU_LEGACY_ORDINAL=" " cl-detect -a -j -b | jq -r '.[] | .busid' ); param=GPU_DEVICE_ORDINAL ;;
+			2) readarray -t BUSID < <( GPU_DEVICE_ORDINAL=" " cl-detect -a -j -b | jq -r '.[] | .busid' ); param=GPU_LEGACY_ORDINAL ;;
+			*) break ;;
+		esac
+		[[ ${#BUSID[@]} -eq 0 ]] && continue
+
+		local need_export=0
+		declare -n ref="$param"
+		ref=
+		for (( idx=0; idx < ${#BUSID[@]}; idx++ )); do
+			[[ " ${GPU_BUSID[*]} " =~ \ ${BUSID[idx]}\  ]] && need_export=1 && continue
+			ref="$ref${ref:+,}$idx"
+		done
+		[[ -z "$ref" ]] && ref=" "
+		[[ $need_export -eq 1 ]] && export "$param" #&& echo "$param=$ref"
+	done
+}
+
+start() {
+	kill_hanged
+
+	session_count=`screen -ls miner | grep -c ".miner"`
+	if [[ $session_count -gt 0 ]]; then
+		echo -e "${YELLOW}Miner screen is already running${NOCOLOR}"
+		echo -e "Run ${CYAN}miner${NOCOLOR} or ${CYAN}screen -r${NOCOLOR} to resume screen"
+		return
+	fi
+
+	[[ -f $RUNNING_FLAG ]] && rm $RUNNING_FLAG
+	[[ -f $MINER_STOP ]] && rm $MINER_STOP
+	[[ -f /run/hive/cur_miner ]] && rm /run/hive/cur_miner
+
+	#[[ ! -z $MAINTENANCE && $MAINTENANCE -gt 0 ]] &&
+	#	echo -e "${YELLOW}Maintenance mode enabled${NOCOLOR}" &&
+	#	exit 1
+
+	if [[ -z $MINER ]]; then
+		message warn "No miner is set" > /dev/null
+		echo -e "${YELLOW}No miner is set in config${NOCOLOR}"
+		exit 1
+	fi
+
+	nvidia-oc delay >/dev/null
+
+	disable_gpu
+
+	echo -en "Starting ${CYAN}$MINER${NOCOLOR}"
+	#[[ ! -z $MINER2 ]] &&
+	#	echo -en " and ${CYAN}$MINER2${NOCOLOR}"
+	local mindex
+	for mindex in {2..32}; do
+		local -n minerval="MINER$mindex"
+		[[ ! -z $minerval ]] &&
+			echo -en ", ${CYAN}$minerval${NOCOLOR}"
+	done
+	echo ""
+
+	#screen -dm -S miner bash -c "${MINER}; bash"
+	# hack to preselect window 1
+	# yes, empty bash or it will hang from time to time if start with screen miner instantly
+	screen -dm -c /hive/etc/screenrc.miner bash
+
+	for i in {1..25}; do
+		sleep 0.25 # it needs some time? it happens that you'll have "No screen session found" without sleep
+		[[ `screen -ls miner | grep -c ".miner"` -gt 0 ]] && break
+		[[ $i == 25 ]] && echo -e "${RED}screen miner not found in 25 iterations, check logs and maybe flash drive speed${NOCOLOR}"
+	done
+
+	for mindex in {32..1}; do
+		[[ $mindex -eq 1 ]] && local -n minerval="MINER" || local -n minerval="MINER$mindex"
+		if [[ ! -z $minerval ]]; then
+			screen -S miner -X screen $mindex miner-run $minerval $mindex
+			sleep 0.5
+			screen -S miner -X title $minerval # set nice title
+			echo $minerval >> /run/hive/cur_miner # add miner-name to the list of working miners
+			sleep 0.5 # to allow to grab dpkg lock
+		fi
+	done
+
+	# do not start watchdog here
+	#touch $RUNNING_FLAG
+
+	# close bash window #0
+	screen -S miner -p bash -X stuff 'exit\n'
+
+	return 0
+}
+
+stop() {
+	[[ -f $RUNNING_FLAG ]] && rm $RUNNING_FLAG
+
+	#echo -e "Stopping ${CYAN}$MINER${NOCOLOR}"
+	#screen -S miner -X quit
+
+	kill_hanged
+
+	#screens=`screen -ls miner | grep -E "[0-9]+\.miner" | cut -d. -f1 | awk '{print $1}'`
+	screens=(`screen -ls miner | grep -Po "\K[0-9]+(?=\.miner)" | sort --unique`)
+	if [[ ${#screens[@]} -eq 0 ]]; then
+		echo "No miner screens found"
+		return 1
+	fi
+
+	# prevent some miners from restarting in the loop
+	echo 1 > $MINER_STOP
+
+	[[ "${BASH_ARGV[0]}" =~ ^-?[0-9]+$ ]] && STOP_TIMEOUT="${BASH_REMATCH[0]}"
+	if [[ $STOP_TIMEOUT -ge 0 ]]; then
+		for pid in "${screens[@]}"; do
+			echo "Sending Ctrl+C to screen session $pid"
+			timeout 1 screen -S $pid.miner -X at "#" stuff ^C
+		done
+		sleep 1
+		check=`screen -ls miner`
+		if [[ $? -eq 0 ]]; then
+			echo -n "Waiting ${STOP_TIMEOUT}s for miners to exit"
+			for (( i=1; i <= $STOP_TIMEOUT; i++ ))
+			do
+				echo -n ". "
+				sleep 1
+				check=`screen -ls miner`
+				[[ $? -ne 0 ]] && echo -n "Done" && break
+			done
+			echo ""
+		fi
+	fi
+
+	# quit them all
+	screens=(`screen -ls miner | grep -Po "\K[0-9]+(?=\.miner)" | sort --unique`)
+	for pid in "${screens[@]}"; do
+		echo "Stopping screen session $pid"
+		timeout 1 screen -S $pid.miner -X quit
+	done
+
+	# remove stop file
+	[[ -f $MINER_STOP ]] && rm $MINER_STOP
+
+	# remove miner status files
+	rm -f /run/hive/miner_status.*
+
+	# run h-stop from miner dir
+	if [[ -f /run/hive/cur_miner ]]; then
+		for CUR_MINER in `cat /run/hive/cur_miner`
+		do
+			CUR_MINER_DIR=/hive/miners/$CUR_MINER
+			[[ -f $CUR_MINER_DIR/h-stop.sh ]] && bash $CUR_MINER_DIR/h-stop.sh
+		done
+		rm /run/hive/cur_miner
+	fi
+
+	# stop nvidia-oc
+	nvidia-oc stop >/dev/null
+
+	# remove khs so no confusing for watchdog
+	#[[ -f /run/hive/khs ]] && rm /run/hive/khs
+	#wd gets mtime of file, no problem
+	return 0
+}
+
+miner_log_basename() {
+	local miner=$1
+	[[ -z $miner ]] && echo "No miner given to miner_log_basename" && return 1
+
+	log_basename=""
+
+	if [[ -e /hive/miners/$miner/h-manifest.conf ]]; then
+		source /hive/miners/$miner/h-manifest.conf
+		[[ -z $MINER_LOG_BASENAME ]] && MINER_LOG_BASENAME=/var/log/miner/$MINER_NAME/$MINER_NAME
+	fi
+
+	# Special miner
+	if [[ $miner == "custom" ]]; then
+		if [[ -z $CUSTOM_MINER ]]; then
+			echo -e "${RED}\$CUSTOM_MINER is not defined${NOCOLOR}"
+			return 1
+		elif [[ -e /hive/miners/custom/$CUSTOM_MINER/h-manifest.conf ]]; then
+			source /hive/miners/custom/$CUSTOM_MINER/h-manifest.conf
+		fi
+		if [[ -z $CUSTOM_LOG_BASENAME ]]; then
+			echo -e "${RED}\$CUSTOM_LOG_BASENAME is not defined${NOCOLOR}"
+			return 1
+		else
+			MINER_LOG_BASENAME=$CUSTOM_LOG_BASENAME
+		fi
+	fi
+
+	if [[ -z $MINER_LOG_BASENAME ]]; then
+		echo -e "${RED}\$MINER_LOG_BASENAME is not defined${NOCOLOR}"
+		return 1
+	else
+		log_basename=$MINER_LOG_BASENAME
+	fi
+
+	echo $log_basename
+	return 0
+}
+
+log_tail() {
+	local TAIL_LINE=80
+
+	local suffix=1
+	[[ ! -z $1 ]] && # second miner
+		suffix=$1
+
+	tail -n $TAIL_LINE /run/hive/miner.$suffix
+	exitcode=$?
+
+	echo -e "$NOCOLOR"
+
+	for i in {1..3}; do
+		title=`timeout 1 screen -S miner -p $suffix -Q title 2>/dev/null`
+		code=$?
+		if [[ $code -lt 124 ]]; then
+			[[ $code -eq 0 ]] &&
+				echo -e "${GREEN}> Miner screen is running${NOCOLOR}" ||
+				echo -e "${RED}> Miner screen is not running${NOCOLOR}"
+			break
+		fi
+		sleep 0.2
+	done
+	screen -wipe miner >/dev/null
+
+	return $exitcode
+
+	#-----------------------------------------------------------
+	log_basename=`miner_log_basename $MINER`
+	if [[ $? -ne 0 ]]; then
+		echo $log_basename # show error message
+		return
+	fi
+
+	logname="${log_basename}.log"
+
+	if [[ ! -e $logname ]]; then
+		echo "Log $logname does not exist yet"
+		return
+	fi
+
+	if [[ `ls -l $logname | awk '{print $5}'` -le 1 ]]; then # can be 1, empty line
+		echo "Log $logname is empty"
+		return
+	fi
+
+	echo "$logname last $TAIL_LINE lines:"
+	echo ""
+	tail -n $TAIL_LINE $logname | sed "s,$(printf '\033')\\[[0-9;]*[a-zA-Z],,g" # sed removes colors
+}
+
+miner_echo_config_file() {
+	echo -e "${YELLOW}=== $1 =================================================${NOCOLOR}"
+	cat $1
+	echo ""
+}
+
+# Shows miner config
+config() {
+	MINER_DIR=/hive/miners/$MINER
+
+	if [[ ! -e $MINER_DIR/h-manifest.conf ]]; then
+		echo -e "${RED}$MINER_DIR/h-manifest.conf does not exist${NOCOLOR}";
+		return 1
+	fi
+	if [[ ! -e $MINER_DIR/h-config.sh ]]; then
+		echo -e "${RED}$MINER_DIR/h-config.sh does not exist${NOCOLOR}";
+		return 1
+	fi
+
+	source $MINER_DIR/h-config.sh
+	source $MINER_DIR/h-manifest.conf
+
+	miner_config_echo
+}
+
+logs_rotate_helper() {
+	local log_basename="$1"
+	local log_filename="$2"
+	[[ -z $2 ]] && log_filename="$1"
+	[[ ! -e "$log_filename.log" ]] && return 0
+
+	# gzip current log
+	gzip -f "$log_filename.log" || return 1
+	# gzip old logs if needed
+	gzip -f "$log_basename".?.log 2>/dev/null
+
+	for i in {8..1}; do
+		[[ -e "$log_basename.$i.log.gz" ]] && mv -f "$log_basename.$i.log.gz" "$log_basename.$((i+1)).log.gz"
+	done
+	[[ -e "$log_filename.log.gz" ]] && mv -f "$log_filename.log.gz" "$log_basename.1.log.gz"
+	return
+}
+
+logs_rotate() {
+	log_basename=`miner_log_basename "$1"`
+	if [[ $? -ne 0 ]]; then
+		echo "$log_basename" #show error message
+		return 1
+	fi
+
+	# Make sure logs dir exists
+	mkdir -p $MINER_LOGS_BASE_DIR/$1
+
+	[[ ! -e "$log_basename.log" ]] && return 0
+
+	# remove nulls if log was already truncated
+	tr -d '\0' < "$log_basename.log" > "$log_basename.0.log"
+	rm -f "$log_basename.log"
+
+	logs_rotate_helper "$log_basename" "$log_basename.0"
+	return
+}
+
+# truncates current log, run by cron
+log_truncate() {
+	MAX_LOG_SIZE=$(( 20 * 1024 * 1024 )) # 20 MB
+
+	log_basename=`miner_log_basename "$1"`
+	if [[ $? -ne 0 ]]; then
+		echo "$log_basename" #show error message
+		return 1
+	fi
+
+	[[ ! -e "$log_basename.log" ]] && return 0
+
+	#fsize=`stat -c%s $log_basename.log`
+	# get real log file size on disk
+	fsize=(`du --block-size=1 $log_basename.log 2>/dev/null`)
+	if [[ $? -eq 0 && ${fsize[0]} -ge $MAX_LOG_SIZE ]]; then
+		# save current log before truncation and remove nulls if it was already truncated
+		tr -d '\0' < "$log_basename.log" > "$log_basename.0.log"
+		echo -e "[$(date)] *** Truncated by $0 ***\n\n" > "$log_basename.log"
+		# and rotate it with others
+		logs_rotate_helper "$log_basename" "$log_basename.0"
+	fi
+	return 0
+}
+
+# Sets MINER to MINER2 if requested
+check_second_miner() {
+	local mindex=$1 # empty or 2, 3, 4, ...
+	[[ -z $mindex || $mindex -eq 1 ]] && return # not a second miner request
+	local -n minerval="MINER$mindex"
+	[[ -z $minerval ]] &&
+		echo "Miner #$mindex is not configured" &&
+		exit 1
+
+	MINER=$minerval # substitute MINER var with second miner
+}
+
+bench_check() {
+	benchmark check > /dev/null 2>&1
+	[[ $? == 0 ]] && bench=1 || bench=0
+	if [[ $bench -eq 1 ]];then
+		echo -e "${RED}Detect running or unfinished benchmark.\nIf you want to stop him run \"benchmark stop\"${NOCOLOR}"
+		message warning "Detect running or unfinished benchmark. If you want to stop him run \"benchmark stop\"" > /dev/null 2>&1
+		exit
+	fi
+}
+
+status() {
+	kill_hanged
+	for i in {1..3}; do
+		query=`timeout 1 screen -S miner -Q windows 2>/dev/null`
+		exitcode=$?
+		[[ $exitcode -lt 124 ]] && break
+		sleep 0.2
+	done
+	screen -wipe miner >/dev/null
+
+	if [[ -n "$1" ]]; then
+		if [[ $exitcode -ge 124 ]]; then
+			echo '{"status":"error", "status_text":"Miners screen query error"}'
+			return 3
+		fi
+		if [[ $exitcode -ne 0 ]]; then
+			if [[ "${query[@]}" =~ miner ]]; then
+				echo '{"status":"error", "status_text":"Miners screen is in inconsistent state"}'
+				return 2
+			else
+				echo '{"status":"stoped"}'
+				return 1
+			fi
+		fi
+
+		running=0
+		readarray -t screens < <( tmp=`echo "$query" | tail -1`; echo "${tmp//  /$'\n'}" )
+		for scr in "${screens[@]}"
+		do
+			if [[ $scr =~ ^([0-9]+)+(.*)$ ]]; then
+				if [[ ${BASH_REMATCH[1]} == "$1" ]]; then
+					if [[ -f ${MINER_STATUS}${1} ]]; then
+						cat ${MINER_STATUS}${1}
+						running=1
+					fi
+				fi
+			fi
+		done
+		[[ $running -eq 0 ]] && echo '{"status":"NA"}'
+	else
+		[[ $exitcode -ge 124 ]] && echo -e "${RED}Miners screen query error${NOCOLOR}" && return 3
+		if [[ $exitcode -ne 0 ]]; then
+			[[ "${query[@]}" =~ miner ]] && echo -e "${RED}Miners screen is in inconsistent state${NOCOLOR}" && return 2
+			echo -e "${YELLOW}No miners are running${NOCOLOR}" && return 1
+		fi
+
+		echo "Running miners in screen:"
+		readarray -t screens < <( tmp=`echo "$query" | tail -1`; echo "${tmp//  /$'\n'}" )
+		for scr in "${screens[@]}"
+		do
+			[[ $scr =~ ^([0-9]+)([^[:space:]]+)?[[:space:]]+(.*)$ ]] && echo -e "[${BASH_REMATCH[1]}] ${CYAN}${BASH_REMATCH[3]}${NOCOLOR}" || echo $scr
+		done
+	fi
+	return 0
+}
+
+########################################################################################################################
+
+case "$1" in
+	start)
+		bench_check
+		# start WD before miner to return miner start exit code not WD
+##		wd start
+		start
+	;;
+	stop)
+		bench_check
+##		wd stop
+		stop
+	;;
+	bench_start)
+		start
+	;;
+	bench_stop)
+		stop
+	;;
+	restart)
+		# we do not touch WD here or it will be reset and never reboot worker
+		bench_check
+		echo -e "${YELLOW}Restarting miner${NOCOLOR}" #can be different on miner change
+		stop
+		if [[ $? -ne 0 && $MAINTENANCE -gt 0 ]]; then
+			echo -e "${YELLOW}Maintenance mode enabled and no miner was running${NOCOLOR}"
+			echo -e "Use ${WHITE}miner start${NOCOLOR} in maintenance mode"
+			exit 1
+		fi
+		# need some time to finish it seems
+		sleep 1
+		start
+	;;
+	config) # miner config 2
+		check_second_miner $2
+		config
+	;;
+	log) # miner log 2 //can be 2 for other miner, log from miner.1 or miner.2!!!
+		check_second_miner $2
+		log_tail $2
+	;;
+	logrotate) # miner logrotate claymore
+		logs_rotate $2
+	;;
+	logtruncate) # miner logtruncate 2
+		check_second_miner $2
+		log_truncate $MINER
+	;;
+	logtruncateall) # miner logtruncate 2
+		for mindex in {1..32}; do
+			check_second_miner $mindex
+			[[ ! -z $MINER ]] && break
+    		log_truncate $MINER
+		done
+	;;
+#	logdirscreate)
+#		for minername in ${miners_avail[@]}; do
+#			mkdir -p $MINER_LOGS_BASE_DIR/$minername
+#		done
+#	;;
+	status)
+		status $2
+	;;
+	help|-h|--help)
+		usage
+	;;
+	*)
+		kill_hanged
+		screen -x -S miner || usage
+	;;
+esac
