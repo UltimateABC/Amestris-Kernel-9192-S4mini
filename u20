@@ -10,28 +10,28 @@ DEBUG_MODE=1
 
 # Function to print debug messages
 infoprint() {
-    if [ "$DEBUG_MODE" -eq 1 ]; then
-        echo "$1"
-    fi
+	if [ "$DEBUG_MODE" -eq 1 ]; then
+		echo "$1"
+	fi
 }
 
 errorMSG() {
 	if [ "$DEBUG_MODE" -eq 1 ]; then
-        /hive/bin/message error "$1"
-    fi
+		/hive/bin/message error "$1"
+	fi
 }
 
 infoMSG() {
 	if [ "$DEBUG_MODE" -eq 1 ]; then
-        /hive/bin/message error "$1"
-    fi
+		/hive/bin/message error "$1"
+	fi
 }
 
 
 successMSG() {
 	if [ "$DEBUG_MODE" -eq 1 ]; then
-        /hive/bin/message success "$1"
-    fi
+		/hive/bin/message success "$1"
+	fi
 }
 
 
