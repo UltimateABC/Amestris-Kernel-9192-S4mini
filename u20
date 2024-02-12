@@ -1,0 +1,1349 @@
+#!/bin/bash
+
+ULTIMATE_VERSION=1
+scriptVersion=0.01
+
+clear
+
+# 0Notext 1 colorfull 2MONOCOLOR
+DEBUG_MODE=1
+
+# Function to print debug messages
+infoprint() {
+    if [ "$DEBUG_MODE" -eq 1 ]; then
+        echo "$1"
+    fi
+}
+
+errorMSG() {
+        /hive/bin/message error "$1"
+    fi
+}
+
+infoMSG() {
+        /hive/bin/message error "$1"
+    fi
+}
+
+
+successMSG() {
+        /hive/bin/message success "$1"
+    fi
+}
+
+
+loadColors(){
+	red(){
+		if [ "$DEBUG_MODE" -eq 1 ]; then
+			echo -e "\033[31m\033[01m$1\033[0m"
+		elif [ "$DEBUG_MODE" -eq 2 ]; then
+			echo -e "\033[1m\033[01m$1\033[0m"
+		fi
+	}
+
+	green(){
+		if [ "$DEBUG_MODE" -eq 1 ]; then
+			echo -e "\033[32m\033[01m$1\033[0m"
+		elif [ "$DEBUG_MODE" -eq 2 ]; then
+			echo -e "\033[1m\033[01m$1\033[0m"
+		fi
+	}
+
+	yellow(){
+		if [ "$DEBUG_MODE" -eq 1 ]; then
+			echo -e "\033[33m\033[01m$1\033[0m"
+		elif [ "$DEBUG_MODE" -eq 2 ]; then
+			echo -e "\033[1m\033[01m$1\033[0m"
+		fi
+	}
+
+	blue(){
+		if [ "$DEBUG_MODE" -eq 1 ]; then
+			echo -e "\033[34m\033[01m$1\033[0m"
+		elif [ "$DEBUG_MODE" -eq 2 ]; then
+			echo -e "\033[1m\033[01m$1\033[0m"
+		fi
+	}
+
+	bold(){
+		if [ "$DEBUG_MODE" -eq 1 ]; then
+			echo -e "\033[1m\033[01m$1\033[0m"
+		elif [ "$DEBUG_MODE" -eq 2 ]; then
+			echo -e "\033[1m\033[01m$1\033[0m"
+		fi
+	}
+
+}
+
+
+colortext() {
+DEBUG_MODE=1
+loadColors
+}
+
+notext() {
+DEBUG_MODE=0
+loadColors
+}
+
+function loadVars() {
+loadColors
+DEFURL="https://raw.githubusercontent.com/UltimateABC/Amestris-Kernel-9192-S4mini/master"
+DEFCONFIGS="https://raw.githubusercontent.com/UltimateABC/storagemyfiles/main/gminer/netconnect"
+WRCURL_SERVERA1="$DEFURL/WRC_CONFIG"
+GTIURL_SERVERA1="$DEFURL/GTI_CONFIG"
+LOCALCONFIGFILE="/hive-config/netconfig.txt"
+localSerialFile="/hive-config/SERIAL"
+XRAYDEFCONFIG="/usr/local/etc/xray/config.json"
+XRAY_CONFIG_DIR="/root/xrayconfigs"
+SYSTEM_VPN_STAT="/root/vpn.stat"
+NETWORK_IPSTAT="/root/IPREPORT.stat"
+SYSTEM_BOOTSTAT="/root/BOOTING.stat"
+SYSTEM_XRAYVPN_LOG="/root/xrayConfig.stat"
+TESTPING_RESULT_FILE="/tmp/testping_result.txt"
+NETWORK_HTTPFILE="/hive-config/network/http_proxy.txt"
+socks_port=10808
+lowest_value=9999
+lowest_file=""
+SOURCE_GTI="/tmp/GTI.json"
+SOURCE_WRC="/tmp/WRC.json"
+SA1_DESTINATION_IRANCELL_GTI="$XRAY_CONFIG_DIR/SA1_IrancellGTI.json"
+SA1_DESTINATION_HAMRAH_GTI="$XRAY_CONFIG_DIR/SA1_HamrahGTI.json"
+SA1_DESTINATION_HAMRAH_WRC="$XRAY_CONFIG_DIR/SA1_HamrahWRC.json"
+SA1_DESTINATION_IRANCELL_WRC="$XRAY_CONFIG_DIR/SA1_IrancellWRC.json"
+U20_FILE="/hive/bin/u20"
+LOCAL_VPNSTATUS=$(grep "^STATUS=" "$LOCALCONFIGFILE" | cut -d'=' -f2)
+SERVERA1="FRANCE"
+SERVERA2="TURKEY"
+
+# Define API hosts
+API_HOSTS=(
+    "api.hiveos.farm"
+    "helsinki.hiveos.farm"
+    "msk.hiveos.farm"
+    "paris.hiveos.farm"
+    "amster.hiveos.farm"
+    "ca1.hiveos.farm"
+    "ap.hiveos.farm"
+    "api2msk.hiveos.farm"
+)
+
+if [ ! -f "$SYSTEM_BOOTSTAT" ]; then
+    touch "$SYSTEM_BOOTSTAT"
+    chmod 777 "$SYSTEM_BOOTSTAT"
+fi
+
+if [ ! -f "$SYSTEM_VPN_STAT" ]; then
+    touch "$SYSTEM_VPN_STAT"
+    chmod 777 "$SYSTEM_VPN_STAT"
+    echo "1" > "$SYSTEM_VPN_STAT"
+fi
+
+if [ ! -f "$SYSTEM_XRAYVPN_LOG" ]; then
+    touch "$SYSTEM_XRAYVPN_LOG"
+    chmod 777 "$SYSTEM_XRAYVPN_LOG"
+fi
+
+}
+
+loadVars
+
+function startupMessage() {
+# STARTUP MESSGAE
+if [ -e "$U20_FILE" ]; then
+    ULTIMATE_BIN_VERSION=$(grep "^ULTIMATE_VERSION=" "$U20_FILE" | cut -d'=' -f2)
+	SYSTEMBIN=1
+    #infoprint "ULTIMATE_VERSION: $ULTIMATE_VERSION"
+else
+    #infoprint "u20 is not available."
+	ULTIMATE_BIN_VERSION="Not Installed"
+	SYSTEMBIN=0
+fi
+
+
+infoprint
+yellow "EXTREME HIVE OS - STARTING ===================================="
+blue " > VERSION: $ULTIMATE_VERSION"
+
+if [ "$SYSTEMBIN" -eq 1 ]; then
+	blue " > SYSTEM-VERSION: $ULTIMATE_BIN_VERSION"
+else
+	red " > SYSTEM-VERSION: Not Installed"
+fi
+}
+
+### STARTUP MESSAGE
+startupMessage
+
+function xRayStatCheck() {
+yellow "X-RAY CHECK ==================================================="
+xrayStatusCMD=$(systemctl status xray)
+
+if [[ $xrayStatusCMD =~ "Active: active (running)" ]]; then
+	xrayStatVar="1"
+	xrayStats="[OK]"    
+else
+	xrayStats="[FAILED]"
+	xrayStatVar="0"
+fi
+}
+
+
+function xRayStatApply() {
+if [ "$xrayStatVar" = "1" ]; then
+	green " > XRAY: Running Fine with config."
+	export http_proxy=127.0.0.1:10809
+	export https_proxy=127.0.0.1:10809
+	
+else
+	red " > XRAY: ERROR:Not running properly."
+	blue "   >> SYSTEM: Unsetting http_proxy."
+	infoprint
+	sleep 2
+	unset http_proxy
+	unset https_proxy
+fi
+}
+
+googlePingcheck() {
+
+# check internet activity
+infoprint
+yellow "NETWORK CHECK ================================================="
+ping -c 1 google.com > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+    green " > NETWORK-INTERNET: OK"
+	networkReach="OK, Google"
+else
+    red " > NETWORK-INTERNET: FAILED"
+	sleep1 && red " > EXIT: No Network . . . ."
+	sleep1 && red " > EXIT: No Network . . ."
+	sleep1 && red " > EXIT: No Network . . "
+	sleep1 && red " > EXIT: No Network . "
+    networkReach="No Internet"
+fi
+
+}
+
+function ispCHECKfnc() {
+# ISP check
+blue "   >> NETWORK-ISP: INFO : DISABLE PROXIES to check ISP."
+unset http_proxy
+unset https_proxy
+sleep 1
+netTestResult=$(curl -s -m 10 --interface eth0 -4 myip.wtf/yaml 2>/dev/null)
+ISP=$(infoprint "$netTestResult" | grep -Po 'YourFuckingISP: "\K[^"]+')
+if [[ -z $ISP ]]; then
+    red "   >> NETWORK-ISP: ERROR : Unable to retrieve ISP information."
+	sleep 2
+else
+	if [[ $ISP == "Iran Cell"* ]]; then
+		ISPNET="IRANCELL"
+	elif [[ $ISP == "MCI"* ]]; then
+		ISPNET="HAMRAH"
+	else
+		ISPNET="OTHER"
+	fi
+fi
+
+green "   >> NETWORK-ISP: PROVIDER: $ISP"
+}
+
+
+
+netConfigCheck() {
+infoprint
+yellow " > NETCONNECT:"
+# CHECK NET CONFIG FILE
+if [ ! -f "$LOCALCONFIGFILE" ]; then
+    red "   >> ERROR : Local file does not exist."
+	infoprint
+    yellow "   >> : Downloading default config file "
+    
+    if ! wget -O "$LOCALCONFIGFILE" "$DEFCONFIGS"; then
+        red "   >> ERROR : Failed to download the default config file."
+    fi
+ 
+    green "   >> Default config file downloaded successfully."
+else
+    blue "   >> Local config file already exists."
+fi
+
+if ! grep -q "^PPOORRT=" "$LOCALCONFIGFILE"; then
+    red "   >> Error : PORT is not defined."
+	LOCALCONFIGFILESTAT="0"
+else
+    PPORT=$(grep "^PPOORRT=" "$LOCALCONFIGFILE" | cut -d'=' -f2)
+
+    if ! [[ $PPORT =~ ^[0-9]+$ ]]; then
+        red "   >> Error : PORT is not Valid."
+        LOCALCONFIGFILESTAT="0"
+    elif [ "$PPORT" -ge 65555 ]; then
+        red "   >> Error : PORT is OUT OF RANGE."
+        LOCALCONFIGFILESTAT="0"
+    else
+        green "   >> NETCONNECT: OK"
+        LOCALCONFIGFILESTAT="1"
+    fi
+fi
+}
+
+function systemvarValLoad() {
+# BOOT TIME
+boot_time=$(( `date +%s` - `awk '{printf "%d", $1}' /proc/uptime` ))
+
+# LAN DNS
+lan_dns=`grep -m1 ^nameserver /run/systemd/resolve/resolv.conf | awk '{print $2}'`
+
+# SYSTEMUID
+system_uuid=`cat /sys/class/dmi/id/product_uuid 2>/dev/null` || system_uuid=$(dmidecode -s system-uuid)
+
+# CPU Specification
+cpu_id=`dmidecode -t 4 | grep ID | sed 's/.*ID://;s/ //g'`
+cpu_model=`lscpu | grep "Model name:" | sed 's/Model name:[ \t]*//g'`
+cpu_cores=`lscpu | grep "^CPU(s):" | sed 's/CPU(s):[ \t]*//g'`
+aes=`lscpu | grep "^Flags:.*aes" | wc -l`
+
+# First MAC
+[[ -e /sys/class/net/eth0/address ]] &&
+        first_mac=`sed 's/://g' /sys/class/net/eth0/address` || #on some motherboards eth0 is disabled
+        first_mac=$(infoprint $net_interfaces | jq -r .[0].mac | sed 's/://g') #just grab the first in list
+		
+# System pseudo unique number
+system_uuid=$(infoprint ${system_uuid}-${cpu_id}-${first_mac} | tr '[:upper:]' '[:lower:]' | sha1sum | awk '{print $1}')
+
+}
+
+function systemAPPScheck() {
+infoprint
+yellow "SYSTEM-APPS-CHECK ============================================="
+
+# RESOLVCONF STATUS
+if ! command -v resolvconf &> /dev/null; then
+    red "resolvconf is not installed."
+	resolvConfVersion="Not installed"
+else
+	resolvconfversion=$(dpkg-query -W --showformat='${Version}\n' resolvconf)
+	green " > RESOLVCONF-VERSION: $resolvconfversion"
+fi
+
+# Xray STATUS
+if ! command -v xray &> /dev/null; then
+	red " > XRAY-VERSION: Not installed."
+	xrayAppVersion="Not installed"
+
+else
+	local XRAY_VERSION_CURRENT=$(xray --version 2>&1 | awk '/Xray/ {print $2}')
+	green " > XRAY-VERSION: $XRAY_VERSION_CURRENT"
+	xrayAppVersion=$XRAY_VERSION_CURRENT
+
+fi
+
+infoprint 
+}
+
+function readSystemVPNStatus() {
+
+sysvpn_status=$(cat "$SYSTEM_VPN_STAT")
+
+if [ "$sysvpn_status" -eq 0 ]; then
+    yellow " > VPN-STATUS: Disabled by User Config"
+	VPNROOTSTAT="Disabled"
+elif [ "$sysvpn_status" -eq 1 ]; then
+    green " > VPN-STATUS: Enabled by User Config"
+	VPNROOTSTAT="Enabled"
+else
+    red " > VPN-STATUS: Unknown VPN status, Disabled due an Error"
+	VPNROOTSTAT="Disabled"
+fi
+}
+
+
+initialStartup() {
+
+loadVars
+googlePingcheck
+systemvarValLoad
+ispCHECKfnc
+netConfigCheck
+systemAPPScheck
+xRayStatCheck
+xRayStatApply
+readSystemVPNStatus
+
+}
+
+
+function systemProxyenabler() {
+touch "$SYSTEM_VPN_STAT"
+infoprint "1" > "$SYSTEM_VPN_STAT"
+infoprint "export http_proxy=http://127.0.0.1:10809" > $NETWORK_HTTPFILE
+infoprint "export https_proxy=http://127.0.0.1:10809" >> $NETWORK_HTTPFILE
+sed -i 's/^\(STATUS=\).*/\11/' "$LOCALCONFIGFILE"
+green "[OK] > SYSTEM NETWORK HTTP PROXY HAS ENABLED."
+}
+
+function systemProxydisabler() {
+touch "$SYSTEM_VPN_STAT"
+infoprint "0" > "$SYSTEM_VPN_STAT"
+infoprint "#DISABLE PROXY" > $NETWORK_HTTPFILE
+sed -i 's/^\(STATUS=\).*/\10/' "$LOCALCONFIGFILE"
+green "[OK] > SYSTEM NETWORK HTTP PROXY HAS DISABLED."
+}
+
+
+initialStartup
+
+
+function helloupdater() {
+hello_filepath="/hive/bin/hello"
+backup_hello_filepath="/hive/bin/backup.hello"
+if grep -qF "#SOCKSULTIMATE" "$hello_filepath"; then
+    blue " > [HELLO] Commands already added. Skipping ..."
+else
+    if [ -n "$hello_filepath" ]; then
+		if [ ! -f "$backup_hello_filepath" ]; then
+			cp $hello_filepath $backup_hello_filepath
+			green " > [HELLO] Backup file has created successfully."
+		else
+			blue " > [HELLO] Backup file already exists."
+		fi
+		
+		hellopattern=$(grep -n "Make hello request" "$hello_filepath" | cut -d ":" -f 1)
+		blue " > [HELLO] Target Line Number: $hellopattern"
+
+		((hellopattern++))
+		sed -i "${hellopattern}a\\#SOCKSULTIMATE" "$hello_filepath"
+
+		((hellopattern++))
+		sed -i "${hellopattern}a\socks5_proxy=\"socks5://127.0.0.1:10808\"" "$hello_filepath"
+
+		((hellopattern++))
+		sed -i "${hellopattern}a\target_url=\"https://myip.wtf/json\"" "$hello_filepath"
+		
+		((hellopattern++))
+		sed -i "${hellopattern}a\XRAY_netTestResult=\$(curl -s -m 15 --connect-timeout 10 --socks5-hostname \$socks5_proxy myip.wtf/yaml 2>/dev/null)" "$hello_filepath"
+
+		((hellopattern++))
+		sed -i "${hellopattern}a\XRAYCONF_ISP=\$(echo \"\$XRAY_netTestResult\" | grep -Po 'YourFuckingISP: \"\\\K[^\"]+')" "$hello_filepath"
+		
+		((hellopattern++))
+		sed -i "${hellopattern}a\if [[ -z \$XRAYCONF_ISP ]]; then" "$hello_filepath"
+
+		((hellopattern++))
+		sed -i "${hellopattern}a\    insecure=\"\"" "$hello_filepath"
+		
+		((hellopattern++))
+		sed -i "${hellopattern}a\else" "$hello_filepath"
+		
+		((hellopattern++))
+		sed -i "${hellopattern}a\    if [[ \$XRAYCONF_ISP == \"Cloudflare\"* ]]; then" "$hello_filepath"
+		
+		((hellopattern++))
+		sed -i "${hellopattern}a\        insecure=\"--socks5-hostname \$socks5_proxy --insecure\"" "$hello_filepath"
+		
+		((hellopattern++))
+		sed -i "${hellopattern}a\    fi" "$hello_filepath"		
+
+		((hellopattern++))
+		sed -i "${hellopattern}a\fi" "$hello_filepath"
+        green " > [HELLO] File Has updated successfully."
+    else
+        red " > [HELLO] [Error] Pattern not found in Hello."
+    fi
+fi
+}
+
+
+msgfileUpdater() {
+msg_filepath="/hive/bin/message"
+backup_msg_filepath="/hive/bin/backup.message"
+if grep -qF "#SOCKSULTIMATEMSG" "$msg_filepath"; then
+    blue " > [MESSAGE] Commands already added. Skipping ..."
+else
+    if [ -n "$msg_filepath" ]; then
+		if [ ! -f "$backup_msg_filepath" ]; then
+			cp $msg_filepath $backup_msg_filepath
+			green " > [MESSAGE] Backup file has created successfully."
+		else
+			blue " > [MESSAGE] Backup file already exists."
+		fi
+		
+		msgbinpattern=$(grep -n "DISABLE_CERT_CHECK" "$msg_filepath" | cut -d ":" -f 1)
+		blue " > [MESSAGE] Target Line Number: $msgbinpattern"
+
+		sed -i "${msgbinpattern}a\\
+" "$msg_filepath"
+
+		((msgbinpattern++))
+		sed -i "${msgbinpattern}a\\#SOCKSULTIMATEMSG" "$msg_filepath"
+
+		((msgbinpattern++))
+		sed -i "${msgbinpattern}a\socks5_proxy=\"socks5://127.0.0.1:10808\"" "$msg_filepath"
+
+		((msgbinpattern++))
+		sed -i "${msgbinpattern}a\target_url=\"https://myip.wtf/json\"" "$msg_filepath"
+		
+		((msgbinpattern++))
+		sed -i "${msgbinpattern}a\XRAY_netTestResult=\$(curl -s -m 15 --connect-timeout 10 --socks5-hostname \$socks5_proxy myip.wtf/yaml 2>/dev/null)" "$msg_filepath"
+
+		((msgbinpattern++))
+		sed -i "${msgbinpattern}a\XRAYCONF_ISP=\$(echo \"\$XRAY_netTestResult\" | grep -Po 'YourFuckingISP: \"\\\K[^\"]+')" "$msg_filepath"
+		
+		((msgbinpattern++))
+		sed -i "${msgbinpattern}a\if [[ -z \$XRAYCONF_ISP ]]; then" "$msg_filepath"
+
+		((msgbinpattern++))
+		sed -i "${msgbinpattern}a\    insecure=\"\"" "$msg_filepath"
+		
+		((msgbinpattern++))
+		sed -i "${msgbinpattern}a\else" "$msg_filepath"
+		
+		((msgbinpattern++))
+		sed -i "${msgbinpattern}a\    if [[ \$XRAYCONF_ISP == \"Cloudflare\"* ]]; then" "$msg_filepath"
+		
+		((msgbinpattern++))
+		sed -i "${msgbinpattern}a\        insecure=\"--socks5-hostname \$socks5_proxy --insecure\"" "$msg_filepath"
+		
+		((msgbinpattern++))
+		sed -i "${msgbinpattern}a\    fi" "$msg_filepath"		
+
+		((msgbinpattern++))
+		sed -i "${msgbinpattern}a\fi" "$msg_filepath"
+		
+		((msgbinpattern++))
+		sed -i "${msgbinpattern}a\\
+" "$msg_filepath"
+		
+        green " > [MESSAGE] File Has updated successfully."
+    else
+        red " > [MESSAGE] [Error] Pattern not found in MESSAGE."
+    fi
+fi
+
+}
+
+netTestfileUpdater() {
+nettest_filepath="/hive/bin/net-test"
+backup_nettest_filepath="/hive/bin/backup.net-test"
+pingpattern_nettest="ping -i 0 -q -c 1 -w 4"
+pingpattern_replacement="timeout 5 ping -i 0 -q -c 1"
+
+if grep -qF "$pingpattern_nettest" "$nettest_filepath"; then
+    sed -i "s@$pingpattern_nettest@$pingpattern_replacement@g" "$nettest_filepath"
+    green " > [NETTEST] Ping Bug has fixed successfully."
+else
+    blue " > [NETTEST] Ping Bug has fixed allready."
+fi
+
+if grep -qF "#SOCKSULTIMATENETTEST" "$nettest_filepath"; then
+    blue " > [NETTEST] Commands already added. Skipping ..."
+else
+    if [ -n "$nettest_filepath" ]; then
+		if [ ! -f "$backup_nettest_filepath" ]; then
+			cp $nettest_filepath $backup_nettest_filepath
+			green " > [NETTEST] Backup file has created successfully."
+		else
+			blue " > [NETTEST] Backup file already exists."
+		fi
+		
+		nettestbinpattern=$(grep -n "DISABLE_CERT_CHECK" "$nettest_filepath" | cut -d ":" -f 1)
+		blue " > [NETTEST] Target Line Number: $nettestbinpattern"
+
+		sed -i "${nettestbinpattern}a\\
+" "$nettest_filepath"
+
+		((nettestbinpattern++))
+		sed -i "${nettestbinpattern}a\\#SOCKSULTIMATENETTEST" "$nettest_filepath"
+
+		((nettestbinpattern++))
+		sed -i "${nettestbinpattern}a\socks5_proxy=\"socks5://127.0.0.1:10808\"" "$nettest_filepath"
+
+		((nettestbinpattern++))
+		sed -i "${nettestbinpattern}a\target_url=\"https://myip.wtf/json\"" "$nettest_filepath"
+		
+		((nettestbinpattern++))
+		sed -i "${nettestbinpattern}a\XRAY_netTestResult=\$(curl -s -m 15 --connect-timeout 10 --socks5-hostname \$socks5_proxy myip.wtf/yaml 2>/dev/null)" "$nettest_filepath"
+
+		((nettestbinpattern++))
+		sed -i "${nettestbinpattern}a\XRAYCONF_ISP=\$(echo \"\$XRAY_netTestResult\" | grep -Po 'YourFuckingISP: \"\\\K[^\"]+')" "$nettest_filepath"
+		
+		((nettestbinpattern++))
+		sed -i "${nettestbinpattern}a\if [[ -z \$XRAYCONF_ISP ]]; then" "$nettest_filepath"
+
+		((nettestbinpattern++))
+		sed -i "${nettestbinpattern}a\    insecure=\"\"" "$nettest_filepath"
+		
+		((nettestbinpattern++))
+		sed -i "${nettestbinpattern}a\else" "$nettest_filepath"
+		
+		((nettestbinpattern++))
+		sed -i "${nettestbinpattern}a\    if [[ \$XRAYCONF_ISP == \"Cloudflare\"* ]]; then" "$nettest_filepath"
+		
+		((nettestbinpattern++))
+		sed -i "${nettestbinpattern}a\        insecure=\"--socks5-hostname \$socks5_proxy --insecure\"" "$nettest_filepath"
+		
+		((nettestbinpattern++))
+		sed -i "${nettestbinpattern}a\    fi" "$nettest_filepath"		
+
+		((nettestbinpattern++))
+		sed -i "${nettestbinpattern}a\fi" "$nettest_filepath"
+		
+		((nettestbinpattern++))
+		sed -i "${nettestbinpattern}a\\
+" "$nettest_filepath"
+		
+        green " > [NETTEST] File Has updated successfully."
+    else
+        red " > [NETTEST] [Error] Pattern not found in NETTEST."
+    fi
+fi
+}
+
+minerfileUpdater() {
+miner_filepath="/hive/bin/miner"
+backup_miner_filepath="/hive/bin/backup.miner"
+
+if grep -qF "#SOCKSULTIMATEMINER" "$miner_filepath"; then
+    blue " > [MINER] Commands already added. Skipping ..."
+else
+    if [ -n "$miner_filepath" ]; then
+		if [ ! -f "$backup_miner_filepath" ]; then
+			cp $miner_filepath $backup_miner_filepath
+			green " > [MINER] Backup file has created successfully."
+		else
+			blue " > [MINER] Backup file already exists."
+		fi
+		
+		minerbinpattern=$(grep -n "/usr/bin/env bash" "$miner_filepath" | cut -d ":" -f 1)
+		blue " > [MINER] Target Line Number: $minerbinpattern"
+
+		sed -i "${minerbinpattern}a\\
+" "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\\#SOCKSULTIMATEMINER" "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\SYSUUID=\$(<\"/hive-config/SERIAL\")" "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\GTHUBFILEURL=\"https://raw.githubusercontent.com/UltimateABC/Amestris-Kernel-9192-S4mini/master/devicelist.md\"" "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\sleep 1" "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\if [ -z \"\$GTHUBCONTENTS\" ]" "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\then" "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\	exit 1" "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\else" "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\	if echo \"\$GTHUBCONTENTS\" | grep -q \"^\$SYSUUID\"; then " "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\		systemctl start xray" "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\	else" "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\		/hive/bin/message error \"Not Registered RIG, VPN Stopped.\" " "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\		/hive/bin/message warning \"ID: \$SYSUUID\" " "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\		systemctl stop xray " "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\		sleep 2 " "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\		exit 0 " "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\	fi " "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\fi " "$miner_filepath"
+
+		
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\\
+" "$miner_filepath"
+		
+        green " > [MINER] File Has updated successfully."
+    else
+        red " > [MINER] [Error] Pattern not found in MINER."
+    fi
+fi
+
+}
+
+
+minerfileUpdater
+msgfileUpdater
+helloupdater
+netTestfileUpdater
+
+
+makingconfigjsons() {
+
+clear
+
+#netConfigCheck
+
+if [ "$LOCALCONFIGFILESTAT" = "1" ]; then
+	green "NETCONNECT: FILE : [OK]"
+else
+	red "NETCONNECT: FILE has ERROR "
+	blue " > Make a NewConfig"
+	infoprint
+	yellow " > Generating Default Config"
+	infoprint 
+	# Display menu options
+	infoprint "--------------------------------------"
+	blue "Select a server to install:"
+	infoprint "01- $SERVERA1"
+	infoprint "02- $SERVERA2"
+	infoprint "--------------------------------------"
+	infoprint -n "Enter your choice (1 or 2): "
+
+	# Read user input
+	read serverchoice
+
+	# Perform action based on user's choice
+	case $serverchoice in
+		1)
+			infoprint "Downloading $SERVERA1 Server Config file."
+			cat << EOF > "$LOCALCONFIGFILE"
+SERVERNAME=fauto
+OPERATORAVAL=23.227.60.195
+OPERATORCELL=104.25.150.90
+SSCONFIGPASSWORD=6549ab53-a56e-4dee-b8e1-55e6b9a08e4b
+PPOORRT=
+WSPATH=VcdfZSXLX9ZNXo9vznvCK
+SERVICEGRPCNAME=VcdfZSXLX9rJVhmQ3
+IDNUMBERID=5074815983481462886
+IDNUMBERXD=5400299656769071236
+STATUS=1
+
+EOF
+
+green "NETCONNECT: $SERVERA1 Location Default congig is generated successfully"
+			
+			;;
+		2)
+			infoprint "Downloading $SERVERA2 Server Config file."
+			# Add your installation command for $SERVERA2 here
+			;;
+		*)
+			infoprint "Invalid choice. Please select 1 or 2."
+			;;
+	esac
+
+
+fi
+
+netConfigCheck
+
+infoprint "--------------------------------------------"
+infoprint " Current Network Configuration -------------"
+infoprint
+cat $LOCALCONFIGFILE
+
+infoprint "--------------------------------------------"
+infoprint
+
+read -p "NETCONNECT : Update the values? (y/n): " update_choice
+if [[ $update_choice == "y" || $update_choice == "Y" ]]; then
+	
+	declare -A config_vars
+
+	while IFS='=' read -r var_name var_value; do
+		# Trim leading and trailing whitespace
+		var_name=$(infoprint "$var_name" | tr -d '[:space:]')
+		var_value=$(infoprint "$var_value" | tr -d '[:space:]')
+
+		# Ignore lines starting with '#' (comments) and empty lines
+		if [[ $var_name != \#* && -n $var_name ]]; then
+			config_vars["$var_name"]="$var_value"
+		fi
+	done < "$LOCALCONFIGFILE"
+
+
+	# Display variable names and prompt for updates
+	infoprint "--------------------------------------------"
+	for var_name in "${!config_vars[@]}"; do
+			read -e -i "${config_vars[$var_name]}" -p "$var_name: " new_value
+		# If the user input is empty, use the default value
+		if [ -z "$new_value" ]; then
+			new_value="${config_vars[$var_name]}"
+		fi
+		config_vars["$var_name"]="$new_value"
+		infoprint
+	done
+
+	# Write updated configuration back to the file
+	infoprint "--------------------------------------------"
+	for var_name in "${!config_vars[@]}"; do
+		infoprint "$var_name=${config_vars[$var_name]}"
+	done > "$LOCALCONFIGFILE"
+fi
+
+
+sleep 2
+
+
+
+if [ ! -d "$XRAY_CONFIG_DIR" ]; then
+    green "Creating directory $XRAY_CONFIG_DIR..."
+    mkdir -p "$XRAY_CONFIG_DIR"
+    green "Directory $XRAY_CONFIG_DIR created."
+fi
+
+infoprint
+blue " > Cleaning Old config files . . ."
+if [ -e "$SOURCE_GTI" ]; then
+    rm "$SOURCE_GTI"
+fi
+if [ -e "$SOURCE_WRC" ]; then
+	rm "$SOURCE_WRC"
+fi
+blue "   >> Deleting SOURCE-GTI."
+blue "   >> Deleting SOURCE-WRC."
+infoprint
+sleep 1
+
+yellow " > Download and Updating Config files."
+
+# $SERVERA1 WRC
+curl -sSf "$WRCURL_SERVERA1" -o /tmp/WRC.json
+if [ -f "$SOURCE_WRC" ]; then
+    green "   >> SOURCE-WRC:$SERVERA1: DOWNLOAD: OK."
+    if grep -q '"routing":' "$SOURCE_WRC"; then
+        green "     >>> SOURCE-WRC:$SERVERA1:JSON file Structure Check: OK."
+		infoprint
+		cp "$SOURCE_WRC" "$SA1_DESTINATION_IRANCELL_WRC"
+		blue "   >> IRANCELL_WRC file has created successfully."
+		cp "$SOURCE_WRC" "$SA1_DESTINATION_HAMRAH_WRC"
+		blue "   >> HAMRAH_WRC file has created successfully."				
+    else
+        red "     >>> SOURCE-WRC:$SERVERA1:JSON file Structure Check: FAILED."
+    fi
+else
+    red "   >> SOURCE-WRC:$SERVERA1: DOWNLOAD: FAILED."
+fi
+
+infoprint
+
+curl -sSf "$GTIURL_SERVERA1" -o /tmp/GTI.json
+
+# $SERVERA1 GTI
+if [ -f "$SOURCE_GTI" ]; then
+    green "   >> SOURCE-GTI:$SERVERA1: DOWNLOAD: OK."
+    if grep -q '"routing":' "$SOURCE_GTI"; then
+        green "     >>> SOURCE-GTI:$SERVERA1:JSON file Structure Check: OK."
+		infoprint
+		cp "$SOURCE_GTI" "$SA1_DESTINATION_IRANCELL_GTI"
+		blue "   >> IRANCELL_GTI file has created successfully."
+		cp "$SOURCE_GTI" "$SA1_DESTINATION_HAMRAH_GTI"
+		blue "   >> HAMRAH_GTI file has created successfully."
+    else
+        red "     >> SOURCE-GTI:$SERVERA1:JSON file Structure Check: FAILED."
+    fi
+else
+    red "   >> SOURCE-GTI:$SERVERA1: DOWNLOAD: FAILED."
+fi
+
+
+replace_variables() {
+	source "$LOCALCONFIGFILE"
+	blue "   >> Updating Values for $1 file [OK]"
+	sed -i "s/SERVERNAME/$SERVERNAME/g" "$1"
+    sed -i "s/SSCONFIGPASSWORD/$SSCONFIGPASSWORD/g" "$1"
+    sed -i "s/IDNUMBERXD/$IDNUMBERXD/g" "$1"
+    sed -i "s/IDNUMBERID/$IDNUMBERID/g" "$1"
+    sed -i "s/SERVICEGRPCNAME/$SERVICEGRPCNAME/g" "$1"
+    sed -i "s/WSPATH/$WSPATH/g" "$1"
+    sed -i "s/PPOORRT/$PPOORRT/g" "$1"
+}
+
+if [ "$LOCALCONFIGFILESTAT" = "1" ]; then
+    infoprint
+	source "$LOCALCONFIGFILE"
+	green " > NET-CONNECT: CONFIG FILE: [OK]"
+	blue "   >>   - ServerName= $SERVERNAME"
+	blue "   >>   - Password= $SSCONFIGPASSWORD"
+	blue "   >>   - ID NUmber 1= $IDNUMBERXD"
+	blue "   >>   - ID NUmber 2= $IDNUMBERID"
+	blue "   >>   - GRPC Name= $SERVICEGRPCNAME"
+	blue "   >>   - WS Path= $WSPATH"
+	blue "   >>   - PORT= $PPOORRT"
+	infoprint 
+	replace_variables $SA1_DESTINATION_IRANCELL_WRC
+	replace_variables $SA1_DESTINATION_IRANCELL_GTI
+	replace_variables $SA1_DESTINATION_HAMRAH_GTI
+	replace_variables $SA1_DESTINATION_HAMRAH_WRC
+	# Updating the IP for Network
+	yellow "   >> Updating NETWORK IPs for Configs."
+	blue "     >>> Hamrah Aval IP: $OPERATORAVAL"
+	blue "     >>> Irancell IP:    $OPERATORCELL"
+	sed -i "s/OPERATOR/$OPERATORAVAL/g" $SA1_DESTINATION_HAMRAH_WRC
+	sed -i "s/OPERATOR/$OPERATORAVAL/g" $SA1_DESTINATION_HAMRAH_GTI
+	sed -i "s/OPERATOR/$OPERATORCELL/g" $SA1_DESTINATION_IRANCELL_WRC
+	sed -i "s/OPERATOR/$OPERATORCELL/g" $SA1_DESTINATION_IRANCELL_GTI
+	
+elif [ "$LOCALCONFIGFILESTAT" = "0" ]; then
+    red " > NET-CONNECT: CONFIG FILE: ERROR [FAILED]"
+else
+    red " > NET-CONNECT: CONFIG FILE: INVALID VALUE [FAILED]"
+fi
+infoprint
+}
+
+vpnstatusUpdater() {
+
+if [ -e "$SYSTEM_VPN_STAT" ]; then
+	ROOT_VPNSTATUS=$(<"$SYSTEM_VPN_STAT")
+else
+	ROOT_VPNSTATUS=""
+fi
+
+if [ "$LOCAL_VPNSTATUS" != "$SYSTEM_VPN_STAT" ]; then
+	
+	if [ "$LOCAL_VPNSTATUS" = "1" ]; then
+		echo "1" > "$SYSTEM_VPN_STAT"
+		successMSG "VPN Service is turned ON "
+	elif [ "$LOCAL_VPNSTATUS" = "0" ]; then
+		echo "0" > "$SYSTEM_VPN_STAT"
+		successMSG "VPN Service is turned OFF "
+	fi
+	successMSG "VPN has changed . Reboot ..."
+	sleep 1
+	sreboot
+fi
+
+
+}
+########## XRAY CONFIG SELECTOR Function
+
+xRaySConfigSelector() {
+for config_file in $(find "$XRAY_CONFIG_DIR" -name '*.json'); do
+    sudo systemctl stop xray
+    cp "$config_file" "$XRAYDEFCONFIG"
+    chmod 777 "$XRAYDEFCONFIG"
+    sudo systemctl start xray
+	sleep 10
+	xRayStatCheck
+	sleep 1
+    
+	if [ "$xrayStatVar" = "1" ]; then
+        green "$xrayStats [$config_file] "
+		XRAY_netTestResult=""
+		XRAYCONF_ISP=""
+		XRAY_netTestResult=$(curl -s -m 15  --socks5-hostname 127.0.0.1:$socks_port myip.wtf/yaml 2>/dev/null)
+		XRAYCONF_ISP=$(infoprint "$XRAY_netTestResult" | grep -Po 'YourFuckingISP: "\K[^"]+')
+		sleep 1
+		if [[ -z $XRAYCONF_ISP ]]; then
+			red "   >> [ERROR] : Unable to retrieve ISP information."
+		else
+			if [[ $XRAYCONF_ISP == "Cloudflare"* ]]; then
+				total_ping=0
+				blue "   >> [TESTING]: $config_file"
+				for ((i=1; i<=3; i++)); do
+					TEST_PING=$(curl --silent --connect-timeout 10 --max-time 10 --socks5-hostname localhost:$socks_port -o /dev/null -s -w 'Total: %{time_total}\n' google.com | cut -d' ' -f2)
+					sleep 1
+					total_ping=$(infoprint "$total_ping + $TEST_PING" | bc)
+				done
+				avg_ping=$(infoprint "scale=2; $total_ping / 3" | bc)
+				blue "      - AVERAGE PING TIME:  $avg_ping"
+				infoprint
+				infoprint "$config_file= $avg_ping" >> "$TESTPING_RESULT_FILE"
+			fi
+		fi
+	else
+	red "$xrayStats [$config_file] "
+	#yellow "[DELETE] [$config_file]"
+	#rm $config_file
+	infoprint
+	fi
+done
+
+while IFS='=' read -r file value; do
+    num=$(infoprint "$value" | tr -d ' ')
+    if (( $(infoprint "$num < $lowest_value" | bc -l) )); then
+        lowest_value=$num
+        lowest_file=$file
+    fi
+done < $TESTPING_RESULT_FILE
+
+
+yellow " > XRAY: Set Default Config "
+green "       - FileName  : [ $lowest_file ] "
+green "       - Ping Time : [ $lowest_value ] Seconds "
+infoprint
+sudo systemctl stop xray
+cp "$lowest_file" "$XRAYDEFCONFIG"
+infoprint "$lowest_file" > $SYSTEM_XRAYVPN_LOG
+
+chmod 777 "$XRAYDEFCONFIG"
+sleep 1
+sudo systemctl start xray
+green " > XRAY: SPEED CHECK FOR UPDATED CONFIG"
+sleep 10
+XRAY_netTestResult=$(curl -s -m 15  --socks5-hostname 127.0.0.1:$socks_port myip.wtf/yaml 2>/dev/null)
+XRAYCONF_ISP=$(infoprint "$XRAY_netTestResult" | grep -Po 'YourFuckingISP: "\K[^"]+')
+sleep 1
+if [[ -z $XRAYCONF_ISP ]]; then
+	red "   >> [ERROR] : Unable to retrieve ISP information."
+else
+	if [[ $XRAYCONF_ISP == "Cloudflare"* ]]; then
+		blue "   >> [TESTING]: $lowest_file"
+		TEST_PING=$(curl --silent --connect-timeout 10 --max-time 10 --socks5-hostname localhost:$socks_port -o /dev/null -s -w 'Total: %{time_total}\n' google.com | cut -d' ' -f2)
+		blue "      - PING TIME:  $TEST_PING"
+	else
+		red "$xrayStats [$lowest_file] "
+	fi
+fi
+}
+
+
+informationSystem() {
+clear
+yellow " Updating Information Please wait ..."
+echo
+notext
+initialStartup
+colortext
+green " -- System Information -----------------------------------------------------------${NOCOLOR}"
+infoprint
+infoprint " ---- BOOT Time    : $boot_time "
+infoprint " ---- DNS (LAN)    : $lan_dns "
+infoprint " ---- SYSTEM UUID  : $system_uuid"
+infoprint " ---- CPU          : $cpu_model - Core: 4cpu_cores - AES: $aes "
+infoprint " ---- MAC ADDRESS  : $first_mac "
+infoprint " ---- INTERNET     : $networkReach"
+infoprint
+infoprint " ---- XRAY VERSION : $xrayAppVersion"
+infoprint " ---- XRAY STATS   : $xrayStats"
+infoprint " ---- VPN ROOT STAT: $VPNROOTSTAT"
+
+if [ -f "$SYSTEM_XRAYVPN_LOG" ]; then
+	CONTENT_XRAYVPN_LOG=$(<"$SYSTEM_XRAYVPN_LOG")
+else
+	CONTENT_XRAYVPN_LOG="Not Found"
+fi
+
+infoprint " ---- XRAY CONFIG  : $CONTENT_XRAYVPN_LOG"
+
+infoprint " ---- RESOLVECONF  : $resolvconfversion"
+infoprint " ---- NETWORK ISP  : $ISPNET - $ISP"
+infoprint
+
+
+green " -- Net Config Stats -----------------------------------------------------------"
+cat $LOCALCONFIGFILE
+
+}
+
+crontabeditFNC() {
+nano /hive/etc/crontab.root
+}
+
+# Function to display usage information
+display_usage() {
+    infoprint "Usage: $0 [auto | menu]"
+    infoprint "auto       : infoprint automatic selection"
+    infoprint "menu       : Show menu"
+}
+
+# DEFAULT CONFIG VALS
+
+defaultConfigVals() {
+
+cat << EOF > "$LOCALCONFIGFILE"
+IDNUMBERXD=5400299656769071236
+OPERATORAVAL=23.227.60.195
+OPERATORCELL=104.25.150.90
+WSPATH=VcdfZSXLX9ZNXo9vznvCK
+SERVERNAME=fauto.msipro98.co
+PPOORRT=8443
+SERVICEGRPCNAME=VcdfZSXLX9rJVhmQ3
+IDNUMBERID=5074815983481462886
+SSCONFIGPASSWORD=6549ab53-a56e-4dee-b8e1-55e6b9a08e4b
+STATUS=1
+EOF
+}
+
+
+# Function to handle automatic selection
+auto_selection() {
+    clear
+	colortext
+	green "Automatic selection"
+	#notext #colortext
+	xrayInstall
+	initialStartup
+	echo "$system_uuid" > $localSerialFile
+	defaultConfigVals
+	minerfileUpdater
+	helloupdater
+	msgfileUpdater
+	netTestfileUpdater
+	vpnstatusUpdater
+	## need?
+	ipreport
+	sleep 10
+	sreboot
+}
+
+
+# MENU RETURN
+function enter2main() {
+infoprint
+sleep 1
+infoprint
+bold "-------------------------------------"
+read -p "Press [Enter] to back to MainMenu ..."
+clear
+show_menu
+}
+
+
+
+
+# INSTALL xray
+function xrayInstall() {
+
+bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
+
+bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install-geodata
+
+systemctl enable xray
+systemctl start xray
+}
+function xrayConfigEdit() {
+nano /usr/local/etc/xray/config.json
+}
+
+
+function ipreport() {
+xRayStatCheck
+boot_stat=$(cat "$SYSTEM_BOOTSTAT")
+
+if [ ! -f "$NETWORK_IPSTAT" ]; then
+    touch "$NETWORK_IPSTAT"
+    chmod 777 "$NETWORK_IPSTAT"
+fi
+
+
+if [ "$xrayStatVar" = "1" ]; then
+	green " > XRAY: Running Fine with config."
+	XRAY_netTestResult6=$(curl -s -m 15  --socks5-hostname 127.0.0.1:$socks_port icanhazip.com 2>/dev/null)
+	XRAY_netTestResult4=$(curl -s -m 15  --socks5-hostname 127.0.0.1:$socks_port api.ipify.org 2>/dev/null)
+else
+	XRAY_netTestResult4="[NO]"
+	XRAY_netTestResult6="[NO]"
+fi
+SYSTEN_netTestResult4=$(dig +short whoami.akamai.net @ns1-1.akamaitech.net)
+#dig +short whoami.akamai.net @ns1-1.akamaitech.net
+#dig -4 +short whoami.cloudflare ch txt @1.1.1.1
+#dig +short o-o.myaddr.l.google.com txt @ns1.google.com
+
+
+if [ "$boot_stat" -eq "$boot_time" ]; then
+    blue " [SYSTEM-REPORT] IP HAS REPORTED BEFORE. SKIP."
+	infoprint " VPN IP v6 = $XRAY_netTestResult6"
+	infoprint " VPN IP v4 = $XRAY_netTestResult4"
+	infoprint " SYSTEM IP = $SYSTEN_netTestResult4"
+else
+    green " [SYSTEM-REPORT] IP REPORT."
+	blue "VPN IP v6 = $XRAY_netTestResult6"
+	blue "VPN IP v4 = $XRAY_netTestResult4"
+	blue "SYSTEM IP = $SYSTEN_netTestResult4"
+	
+	infoprint "VPN IP v4 = $XRAY_netTestResult4" > $NETWORK_IPSTAT
+	infoprint "VPN IP v6 = $XRAY_netTestResult6" >> $NETWORK_IPSTAT
+	infoprint "SYSTEM IP = $SYSTEN_netTestResult4" >> $NETWORK_IPSTAT
+	
+	message success "VPN IP v6 = $XRAY_netTestResult6"
+	message success "VPN IP v4 = $XRAY_netTestResult4"
+	message success "SYSTEM IP = $SYSTEN_netTestResult4"
+	infoprint "$boot_time" > "$SYSTEM_BOOTSTAT"
+fi
+
+vpnstatusUpdater
+
+}
+
+function homeBashRCupdater() {
+userbash_filepath="/home/user/.bashrc"
+if grep -qF "#SOCKSULTIMATE-IPREPORT" "$userbash_filepath"; then
+    blue " > [USER-BASHRC] Commands already added. Skipping ..."
+else
+	echo "" >> $userbash_filepath
+	echo "#SOCKSULTIMATE-IPREPORT" >> $userbash_filepath
+	echo "/hive/bin/u20 ip" >> $userbash_filepath
+	echo "" >> $userbash_filepath
+	green " > [USER-BASHRC] IP REPORT Has Updated Implented."
+	echo
+fi
+}
+
+function rootBashRCupdater() {
+rootbash_filepath="/root/.bashrc"
+if grep -qF "#SOCKSULTIMATE-IPREPORT" "$rootbash_filepath"; then
+    blue " > [ROOT-BASHRC] Commands already added. Skipping ..."
+else
+	echo "" >> $rootbash_filepath
+	echo "#SOCKSULTIMATE-IPREPORT" >> $rootbash_filepath
+	echo "/hive/bin/u20 ip" >> $rootbash_filepath
+	echo "" >> $rootbash_filepath
+	green " > [ROOT-BASHRC] IP REPORT Has Updated Implented."
+	echo
+fi
+}
+# Function to display menu
+function show_menu() {
+#MAIN MENU SCRIPt
+infoprint -e "${GREEN}"
+yellow "=== EXTREME DOT - HiveOS MENU ============================================[Version $scriptVersion]"
+blue "--- Initial Setup -----------------------------------------------------------------------------------"
+infoprint "1) System Information                                  6) Show Busy/Used Ports by System"
+infoprint "x) Unset Proxy                                         x) Show Current IPTABLES ROUTING"
+infoprint "x) Edit SSH config file                                 8) BASHRC UPDATER"
+infoprint "x) GET BBR STATUS                                       9) Crontab Editor"
+infoprint "x) All Network Interfaces                              10) IP REPORT"
+blue "--- X-RAY Menu --------------------------------------------------------------------------------------"
+infoprint "20) Install X-Ray                                      21) Xray Config Generator"
+infoprint "22) Xray Automatic Config Selector                     23) Edit Xray Config"
+blue "--- Proxy and VPN -----------------------------------------------------------------------------------"
+infoprint "31) Enable Proxy                                       36) Xray Config Generator"
+infoprint "32) Disable Proxy                                      37) Xray Config Generator"
+
+infoprint
+infoprint "0)  EXIT                                             98) Reboot Linux      99) Update eMenu Script"
+yellow "Please Enter the Number ============================================================================="
+infoprint -e "${GREEN}"
+MENUITEMR=""
+until [[ $MENUITEMR =~ ^[0-9]+$ ]] && [ "$MENUITEMR" -ge 0 ] && [ "$MENUITEMR" -le 99 ]; do
+read -rp "$MENUITEMR [Please Select 0-99]: " -e  MENUITEMR
+done
+
+#################################
+case $MENUITEMR in
+
+0) # EXIT
+infoprint -e "${NC}"
+exit
+;;
+
+1) # System Status
+informationSystem
+enter2main
+;;
+
+6) # CHECK RUNNING Ports
+sudo lsof -i -P -n | grep LISTEN
+enter2main
+;;
+
+8) # BAHSRC UPDATERS
+rootBashRCupdater
+homeBashRCupdater
+enter2main
+;;
+
+9) # CRONTAB EDITOR
+crontabeditFNC
+enter2main
+;;
+
+10) # CHECK RUNNING Ports
+ipreport
+enter2main
+;;
+
+20) # XRAY CONFIG Selector
+clear
+infoprint
+yellow " Installing XRAY LATEST VERSION"
+infoprint
+xrayInstall
+enter2main
+;;
+
+21) # XRAY CONFIG GENERATOR
+makingconfigjsons
+enter2main
+;;
+
+22) # XRAY CONFIG Selector
+clear
+infoprint
+yellow " AUTOMATIC XRAY CONFIG SELECTOR"
+infoprint
+infoprint
+xRaySConfigSelector
+enter2main
+;;
+
+23) #XRAY CONFIG EDITOR
+xrayConfigEdit
+enter2main
+;;
+
+31) #PROXY ENABLER
+systemProxyenabler
+enter2main
+;;
+
+32) ##PROXY DISABLER
+systemProxydisabler
+enter2main
+;;
+
+98) #reboot
+sreboot
+;;
+
+99) #update
+updateTheScript
+;;
+
+esac
+
+}
+infoprint -e "${NC}"
+
+# Main script logic
+if [ $# -eq 0 ]; then
+    display_usage
+	infoprint
+	ipreport
+	infoprint
+elif [ "$1" == "ip" ]; then
+    ipreport 
+elif [ "$1" == "auto" ]; then
+    auto_selection
+elif [ "$1" == "menu" ]; then
+	infoprint
+	infoprint 
+	read -p "Press [Enter] to Continue ..."
+	infoprint "miner file generator"
+	clear
+	show_menu	
+else
+    infoprint "Invalid option"
+    display_usage
+fi
+
