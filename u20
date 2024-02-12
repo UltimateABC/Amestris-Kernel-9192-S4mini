@@ -111,6 +111,7 @@ SA1_DESTINATION_IRANCELL_GTI="$XRAY_CONFIG_DIR/SA1_IrancellGTI.json"
 SA1_DESTINATION_HAMRAH_GTI="$XRAY_CONFIG_DIR/SA1_HamrahGTI.json"
 SA1_DESTINATION_HAMRAH_WRC="$XRAY_CONFIG_DIR/SA1_HamrahWRC.json"
 SA1_DESTINATION_IRANCELL_WRC="$XRAY_CONFIG_DIR/SA1_IrancellWRC.json"
+U20_FILEURl="$DEFURL/u20"
 U20_FILE="/hive/bin/u20"
 LOCAL_VPNSTATUS=$(grep "^STATUS=" "$LOCALCONFIGFILE" | cut -d'=' -f2)
 SERVERA1="FRANCE"
@@ -522,6 +523,29 @@ else
 fi
 
 }
+
+u20fileUpdater() {
+
+U20_FILEURl="$DEFURL/u20"
+U20_FILE="/hive/bin/u20"
+
+if [ ! -f "$U20_FILE" ]; then
+	infoprint
+    yellow "   >> : Downloading u20 file "
+    
+    if ! wget -O "$U20_FILE" "$U20_FILEURl"; then
+        red "   >> ERROR : Failed to download u20 file ."
+    fi
+    green "   >> u20 file downloaded successfully."
+	chmod +x $U20_FILE
+else
+    blue "   >> u20 file  file already exists."
+	chmod +x $U20_FILE
+fi
+
+}
+
+
 
 netTestfileUpdater() {
 nettest_filepath="/hive/bin/net-test"
@@ -1091,6 +1115,7 @@ auto_selection() {
 	colortext
 	green "Automatic selection"
 	#notext #colortext
+	u20fileUpdater
 	xrayInstall
 	initialStartup
 	echo "$system_uuid" > $localSerialFile
@@ -1346,4 +1371,3 @@ else
     infoprint "Invalid option"
     display_usage
 fi
-
