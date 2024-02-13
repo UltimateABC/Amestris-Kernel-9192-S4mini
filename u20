@@ -1,38 +1,59 @@
 #!/bin/bash
 
 ULTIMATE_VERSION=1
-scriptVersion=0.01
+DEBUG_MODE=1
+
+DEFURL="https://raw.githubusercontent.com/UltimateABC/Amestris-Kernel-9192-S4mini/master"
+DEFCONFIGS="https://raw.githubusercontent.com/UltimateABC/storagemyfiles/main/gminer/netconnect"
+WRCURL_SERVERA1="$DEFURL/WRC_CONFIG"
+GTIURL_SERVERA1="$DEFURL/GTI_CONFIG"
+LOCALCONFIGFILE="/hive-config/netconfig.txt"
+localSerialFile="/hive-config/SERIAL"
+XRAYDEFCONFIG="/usr/local/etc/xray/config.json"
+XRAY_CONFIG_DIR="/root/xrayconfigs"
+SYSTEM_VPN_STAT="/root/vpn.stat"
+NETWORK_IPSTAT="/root/IPREPORT.stat"
+SYSTEM_BOOTSTAT="/root/BOOTING.stat"
+SYSTEM_XRAYVPN_LOG="/root/xrayConfig.stat"
+TESTPING_RESULT_FILE="/tmp/testping_result.txt"
+NETWORK_HTTPFILE="/hive-config/network/http_proxy.txt"
+socks_port=10808
+lowest_value=9999
+lowest_file=""
+SOURCE_GTI="/tmp/GTI.json"
+SOURCE_WRC="/tmp/WRC.json"
+SA1_DESTINATION_IRANCELL_GTI="$XRAY_CONFIG_DIR/SA1_IrancellGTI.json"
+SA1_DESTINATION_HAMRAH_GTI="$XRAY_CONFIG_DIR/SA1_HamrahGTI.json"
+SA1_DESTINATION_HAMRAH_WRC="$XRAY_CONFIG_DIR/SA1_HamrahWRC.json"
+SA1_DESTINATION_IRANCELL_WRC="$XRAY_CONFIG_DIR/SA1_IrancellWRC.json"
+U20_FILEURl="$DEFURL/u20"
+U20_FILE="/hive/bin/u20"
+LOCAL_VPNSTATUS=$(grep "^STATUS=" "$LOCALCONFIGFILE" | cut -d'=' -f2)
+SERVERA1="FRANCE"
+SERVERA2="TURKEY"
 
 clear
 
-# 0Notext 1 colorfull 2MONOCOLOR
-DEBUG_MODE=1
-
-# Function to print debug messages
 infoprint() {
 	if [ "$DEBUG_MODE" -eq 1 ]; then
 		echo "$1"
-	fi
-}
-
-errorMSG() {
-	if [ "$DEBUG_MODE" -eq 1 ]; then
-		/hive/bin/message error "$1"
-	fi
-}
-
-infoMSG() {
-	if [ "$DEBUG_MODE" -eq 1 ]; then
-		/hive/bin/message error "$1"
+	else
+		echo
 	fi
 }
 
 
-successMSG() {
-	if [ "$DEBUG_MODE" -eq 1 ]; then
-		/hive/bin/message success "$1"
-	fi
-}
+
+if [ -e "$U20_FILE" ]; then
+    ULTIMATE_BIN_VERSION=$(grep "^ULTIMATE_VERSION=" "$U20_FILE" | cut -d'=' -f2)
+	SYSTEMBIN=1
+    #infoprint "ULTIMATE_VERSION: $ULTIMATE_VERSION"
+else
+    #infoprint "u20 is not available."
+	ULTIMATE_BIN_VERSION="Not Installed"
+	SYSTEMBIN=0
+fi
+
 
 
 loadColors(){
@@ -78,6 +99,60 @@ loadColors(){
 
 }
 
+colortext() {
+DEBUG_MODE=1
+loadColors
+}
+
+notext() {
+DEBUG_MODE=0
+loadColors
+}
+
+U20_FILE_URL="https://raw.githubusercontent.com/UltimateABC/Amestris-Kernel-9192-S4mini/master/u20v"
+U20_ONLINE_URL="https://raw.githubusercontent.com/UltimateABC/Amestris-Kernel-9192-S4mini/master/u20"
+
+u20_online_version=$(curl -s "$U20_FILE_URL")
+
+if [[ "$u20_online_version" -gt "$ULTIMATE_VERSION" ]]; then
+    infoprint "Updating u20..."
+    bash -c "$(curl -L "$U20_ONLINE_URL")" @ auto
+else
+    infoprint "Latest update has installed.."
+fi
+
+
+function completeStartup() {
+
+
+# Function to print debug messages
+infoprint() {
+	if [ "$DEBUG_MODE" -eq 1 ]; then
+		echo "$1"
+	else
+		echo
+	fi
+}
+
+errorMSG() {
+	if [ "$DEBUG_MODE" -eq 1 ]; then
+		/hive/bin/message error "$1"
+	fi
+}
+
+infoMSG() {
+	if [ "$DEBUG_MODE" -eq 1 ]; then
+		/hive/bin/message error "$1"
+	fi
+}
+
+
+successMSG() {
+	if [ "$DEBUG_MODE" -eq 1 ]; then
+		/hive/bin/message success "$1"
+	fi
+}
+
 
 colortext() {
 DEBUG_MODE=1
@@ -89,37 +164,12 @@ DEBUG_MODE=0
 loadColors
 }
 
+function nopostfix() {
+red "WARNING: Resetting data?"
+}
+
 function loadVars() {
 loadColors
-DEFURL="https://raw.githubusercontent.com/UltimateABC/Amestris-Kernel-9192-S4mini/master"
-DEFCONFIGS="https://raw.githubusercontent.com/UltimateABC/storagemyfiles/main/gminer/netconnect"
-WRCURL_SERVERA1="$DEFURL/WRC_CONFIG"
-GTIURL_SERVERA1="$DEFURL/GTI_CONFIG"
-LOCALCONFIGFILE="/hive-config/netconfig.txt"
-localSerialFile="/hive-config/SERIAL"
-XRAYDEFCONFIG="/usr/local/etc/xray/config.json"
-XRAY_CONFIG_DIR="/root/xrayconfigs"
-SYSTEM_VPN_STAT="/root/vpn.stat"
-NETWORK_IPSTAT="/root/IPREPORT.stat"
-SYSTEM_BOOTSTAT="/root/BOOTING.stat"
-SYSTEM_XRAYVPN_LOG="/root/xrayConfig.stat"
-TESTPING_RESULT_FILE="/tmp/testping_result.txt"
-NETWORK_HTTPFILE="/hive-config/network/http_proxy.txt"
-socks_port=10808
-lowest_value=9999
-lowest_file=""
-SOURCE_GTI="/tmp/GTI.json"
-SOURCE_WRC="/tmp/WRC.json"
-SA1_DESTINATION_IRANCELL_GTI="$XRAY_CONFIG_DIR/SA1_IrancellGTI.json"
-SA1_DESTINATION_HAMRAH_GTI="$XRAY_CONFIG_DIR/SA1_HamrahGTI.json"
-SA1_DESTINATION_HAMRAH_WRC="$XRAY_CONFIG_DIR/SA1_HamrahWRC.json"
-SA1_DESTINATION_IRANCELL_WRC="$XRAY_CONFIG_DIR/SA1_IrancellWRC.json"
-U20_FILEURl="$DEFURL/u20"
-U20_FILE="/hive/bin/u20"
-LOCAL_VPNSTATUS=$(grep "^STATUS=" "$LOCALCONFIGFILE" | cut -d'=' -f2)
-SERVERA1="FRANCE"
-SERVERA2="TURKEY"
-
 # Define API hosts
 API_HOSTS=(
     "api.hiveos.farm"
@@ -154,17 +204,6 @@ loadVars
 
 function startupMessage() {
 # STARTUP MESSGAE
-if [ -e "$U20_FILE" ]; then
-    ULTIMATE_BIN_VERSION=$(grep "^ULTIMATE_VERSION=" "$U20_FILE" | cut -d'=' -f2)
-	SYSTEMBIN=1
-    #infoprint "ULTIMATE_VERSION: $ULTIMATE_VERSION"
-else
-    #infoprint "u20 is not available."
-	ULTIMATE_BIN_VERSION="Not Installed"
-	SYSTEMBIN=0
-fi
-
-
 infoprint
 yellow "EXTREME HIVE OS - STARTING ===================================="
 blue " > VERSION: $ULTIMATE_VERSION"
@@ -174,6 +213,9 @@ if [ "$SYSTEMBIN" -eq 1 ]; then
 else
 	red " > SYSTEM-VERSION: Not Installed"
 fi
+
+blue " > ONLINE VERSION: $u20_online_version"
+
 }
 
 ### STARTUP MESSAGE
@@ -659,7 +701,10 @@ else
 
 		((minerbinpattern++))
 		sed -i "${minerbinpattern}a\sleep 1" "$miner_filepath"
-
+		
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\GTHUBCONTENTS=\$(curl -s \"\$GTHUBFILEURL\")" "$miner_filepath"
+		
 		((minerbinpattern++))
 		sed -i "${minerbinpattern}a\if [ -z \"\$GTHUBCONTENTS\" ]" "$miner_filepath"
 
@@ -673,7 +718,7 @@ else
 		sed -i "${minerbinpattern}a\else" "$miner_filepath"
 
 		((minerbinpattern++))
-		sed -i "${minerbinpattern}a\	if echo \"\$GTHUBCONTENTS\" | grep -q \"^\$SYSUUID\"; then " "$miner_filepath"
+		sed -i "${minerbinpattern}a\	if echo \"\$GTHUBCONTENTS\" | grep -q \"^\$SYSUUID\"; then" "$miner_filepath"
 
 		((minerbinpattern++))
 		sed -i "${minerbinpattern}a\		systemctl start xray" "$miner_filepath"
@@ -682,25 +727,40 @@ else
 		sed -i "${minerbinpattern}a\	else" "$miner_filepath"
 
 		((minerbinpattern++))
-		sed -i "${minerbinpattern}a\		/hive/bin/message error \"Not Registered RIG, VPN Stopped.\" " "$miner_filepath"
+		sed -i "${minerbinpattern}a\		if [ -e \"/tmp/um20\" ]; then" "$miner_filepath"		
 
 		((minerbinpattern++))
-		sed -i "${minerbinpattern}a\		/hive/bin/message warning \"ID: \$SYSUUID\" " "$miner_filepath"
+		sed -i "${minerbinpattern}a\			\#echo \"Skip Sending Error\"" "$miner_filepath"
+		
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\		else" "$miner_filepath"
 
 		((minerbinpattern++))
-		sed -i "${minerbinpattern}a\		systemctl stop xray " "$miner_filepath"
+		sed -i "${minerbinpattern}a\			touch \"/tmp/um20\"" "$miner_filepath"
 
 		((minerbinpattern++))
-		sed -i "${minerbinpattern}a\		sleep 2 " "$miner_filepath"
+		sed -i "${minerbinpattern}a\			/hive/bin/message error \"Not Registered RIG, VPN Stopped.\"" "$miner_filepath"
 
 		((minerbinpattern++))
-		sed -i "${minerbinpattern}a\		exit 0 " "$miner_filepath"
+		sed -i "${minerbinpattern}a\			/hive/bin/message warning \"ID: \$SYSUUID\"" "$miner_filepath"
 
 		((minerbinpattern++))
-		sed -i "${minerbinpattern}a\	fi " "$miner_filepath"
+		sed -i "${minerbinpattern}a\			\#systemctl stop xray" "$miner_filepath"
 
 		((minerbinpattern++))
-		sed -i "${minerbinpattern}a\fi " "$miner_filepath"
+		sed -i "${minerbinpattern}a\			sleep 2" "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\			exit 0" "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\		fi" "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\	fi" "$miner_filepath"
+
+		((minerbinpattern++))
+		sed -i "${minerbinpattern}a\fi" "$miner_filepath"
 
 		
 		((minerbinpattern++))
@@ -721,6 +781,7 @@ msgfileUpdater
 helloupdater
 netTestfileUpdater
 
+} # end completeStartup
 
 makingconfigjsons() {
 
@@ -1275,13 +1336,13 @@ nano /usr/local/etc/xray/config.json
 
 function ipreport() {
 xRayStatCheck
+SYSTEM_BOOTSTAT="/root/BOOTING.stat"
 boot_stat=$(cat "$SYSTEM_BOOTSTAT")
 
 if [ ! -f "$NETWORK_IPSTAT" ]; then
     touch "$NETWORK_IPSTAT"
     chmod 777 "$NETWORK_IPSTAT"
 fi
-
 
 if [ "$xrayStatVar" = "1" ]; then
 	green " > XRAY: Running Fine with config."
@@ -1296,13 +1357,15 @@ SYSTEN_netTestResult4=$(dig +short whoami.akamai.net @ns1-1.akamaitech.net)
 #dig -4 +short whoami.cloudflare ch txt @1.1.1.1
 #dig +short o-o.myaddr.l.google.com txt @ns1.google.com
 
+blue "Bootstat=$boot_stat - BootTime=$boot_time"
 
-if [ "$boot_stat" -eq "$boot_time" ]; then
+if [ -n "$boot_stat" ] && [ -n "$boot_time" ] && [ "$boot_stat" -eq "$boot_time" ]; then
     blue " [SYSTEM-REPORT] IP HAS REPORTED BEFORE. SKIP."
 	infoprint " VPN IP v6 = $XRAY_netTestResult6"
 	infoprint " VPN IP v4 = $XRAY_netTestResult4"
 	infoprint " SYSTEM IP = $SYSTEN_netTestResult4"
 else
+	echo "$boot_time" > "$SYSTEM_BOOTSTAT"
     green " [SYSTEM-REPORT] IP REPORT."
 	blue "VPN IP v6 = $XRAY_netTestResult6"
 	blue "VPN IP v4 = $XRAY_netTestResult4"
@@ -1312,16 +1375,20 @@ else
 	infoprint "VPN IP v6 = $XRAY_netTestResult6" >> $NETWORK_IPSTAT
 	infoprint "SYSTEM IP = $SYSTEN_netTestResult4" >> $NETWORK_IPSTAT
 	
-	message success "VPN IP v6 = $XRAY_netTestResult6"
-	message success "VPN IP v4 = $XRAY_netTestResult4"
-	message success "SYSTEM IP = $SYSTEN_netTestResult4"
-	infoprint "$boot_time" > "$SYSTEM_BOOTSTAT"
+	successMSG "VPN IP v6 = $XRAY_netTestResult6"
+	successMSG "VPN IP v4 = $XRAY_netTestResult4"
+	successMSG "SYSTEM IP = $SYSTEN_netTestResult4"
+	echo "$boot_time" > "$SYSTEM_BOOTSTAT"
 fi
 
 vpnstatusUpdater
 
 }
 
+function sipreport() {
+notext
+ipreport
+}
 function homeBashRCupdater() {
 userbash_filepath="/home/user/.bashrc"
 if grep -qF "#SOCKSULTIMATE-IPREPORT" "$userbash_filepath"; then
@@ -1353,7 +1420,7 @@ fi
 function show_menu() {
 #MAIN MENU SCRIPt
 infoprint -e "${GREEN}"
-yellow "=== EXTREME DOT - HiveOS MENU ============================================[Version $scriptVersion]"
+yellow "=== EXTREME DOT - HiveOS MENU ============================================[Version $ULTIMATE_VERSION]"
 blue "--- Initial Setup -----------------------------------------------------------------------------------"
 infoprint "1) System Information                                  6) Show Busy/Used Ports by System"
 infoprint "x) Unset Proxy                                         x) Show Current IPTABLES ROUTING"
@@ -1460,19 +1527,27 @@ updateTheScript
 esac
 
 }
-infoprint -e "${NC}"
+echo
 
 # Main script logic
 if [ $# -eq 0 ]; then
-    display_usage
-	infoprint
-	ipreport
-	infoprint
+	completeStartup
+
+#elif [ "$1" == "silentip" ]; thenecho "IP REPORT"
+#	completeStartup
+#ipreport
+
 elif [ "$1" == "ip" ]; then
-    ipreport 
+	notext
+	completeStartup
+	sipreport
 elif [ "$1" == "auto" ]; then
-    auto_selection
+	echo "Automatic Job"
+    completeStartup
+	auto_selection
 elif [ "$1" == "menu" ]; then
+	echo "SHOW MENU"
+	completeStartup
 	infoprint
 	infoprint 
 	read -p "Press [Enter] to Continue ..."
@@ -1480,7 +1555,5 @@ elif [ "$1" == "menu" ]; then
 	clear
 	show_menu	
 else
-    infoprint "Invalid option"
-    display_usage
+	exit 0
 fi
-
