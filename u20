@@ -1049,13 +1049,9 @@ infoprint
 
 vpnstatusUpdater() {
 
-if [ -e "$SYSTEM_VPN_STAT" ]; then
-	ROOT_VPNSTATUS=$(<"$SYSTEM_VPN_STAT")
-else
-	ROOT_VPNSTATUS=""
-fi
+readSystemVPNStatus
 
-if [ "$LOCAL_VPNSTATUS" != "$SYSTEM_VPN_STAT" ]; then
+if [ "$LOCAL_VPNSTATUS" != "$sysvpn_status" ]; then
 	
 	if [ "$LOCAL_VPNSTATUS" = "1" ]; then
 		echo "1" > "$SYSTEM_VPN_STAT"
