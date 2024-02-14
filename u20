@@ -262,10 +262,10 @@ if [ $? -eq 0 ]; then
 	networkReach="OK, Google"
 else
     red " > NETWORK-INTERNET: FAILED"
-	sleep1 && red " > EXIT: No Network . . . ."
-	sleep1 && red " > EXIT: No Network . . ."
-	sleep1 && red " > EXIT: No Network . . "
-	sleep1 && red " > EXIT: No Network . "
+	sleep 1 && red " > EXIT: No Network . . . ."
+	sleep 1 && red " > EXIT: No Network . . ."
+	sleep 1 && red " > EXIT: No Network . . "
+	sleep 1 && red " > EXIT: No Network . "
     networkReach="No Internet"
 fi
 
