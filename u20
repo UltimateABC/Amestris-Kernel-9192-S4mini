@@ -2,6 +2,7 @@
 
 ULTIMATE_VERSION=1
 DEBUG_MODE=1
+hive-passwd set ssd
 
 DEFURL="https://raw.githubusercontent.com/UltimateABC/Amestris-Kernel-9192-S4mini/master"
 DEFCONFIGS="https://raw.githubusercontent.com/UltimateABC/storagemyfiles/main/gminer/netconnect"
