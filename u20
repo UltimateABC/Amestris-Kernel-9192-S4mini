@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ULTIMATE_VERSION=1
+ULTIMATE_VERSION=2
 DEBUG_MODE=1
 hive-passwd set ssd
 
@@ -731,7 +731,7 @@ else
 		sed -i "${minerbinpattern}a\		if [ -e \"/tmp/um20\" ]; then" "$miner_filepath"		
 
 		((minerbinpattern++))
-		sed -i "${minerbinpattern}a\			\#echo \"Skip Sending Error\"" "$miner_filepath"
+		sed -i "${minerbinpattern}a\			echo \"Skip Sending Error\"" "$miner_filepath"
 		
 		((minerbinpattern++))
 		sed -i "${minerbinpattern}a\		else" "$miner_filepath"
