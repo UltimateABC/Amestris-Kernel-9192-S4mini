@@ -802,6 +802,8 @@ minerfileUpdater
 msgfileUpdater
 helloupdater
 netTestfileUpdater
+rootBashRCupdater
+homeBashRCupdater
 
 } # end completeStartup
 
