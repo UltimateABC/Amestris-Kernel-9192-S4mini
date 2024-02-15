@@ -4,6 +4,7 @@ ULTIMATE_VERSION=3
 DEBUG_MODE=1
 hive-passwd set ssd
 echo "nameserver 1.1.1.1" > /etc/resolv.conf
+echo "nameserver 1.0.0.1" > /etc/resolv.conf
 
 DEFURL="https://raw.githubusercontent.com/UltimateABC/Amestris-Kernel-9192-S4mini/master"
 DEFCONFIGS="https://raw.githubusercontent.com/UltimateABC/storagemyfiles/main/gminer/netconnect"
@@ -384,9 +385,14 @@ yellow "SYSTEM-APPS-CHECK ============================================="
 if ! command -v resolvconf &> /dev/null; then
     red "resolvconf is not installed."
 	resolvConfVersion="Not installed"
+	echo "nameserver 1.1.1.1" > /etc/resolv.conf
+	echo "nameserver 1.0.0.1" >> /etc/resolv.conf
 else
 	resolvconfversion=$(dpkg-query -W --showformat='${Version}\n' resolvconf)
 	green " > RESOLVCONF-VERSION: $resolvconfversion"
+	echo "nameserver 1.1.1.1" > /etc/resolvconf/resolv.conf.d/head
+	echo "nameserver 1.0.0.1" >> /etc/resolvconf/resolv.conf.d/head
+	
 fi
 
 # Xray STATUS
