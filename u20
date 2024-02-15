@@ -118,7 +118,21 @@ u20_online_version=$(curl -s "$U20_FILE_URL")
 
 if [[ "$u20_online_version" -gt "$ULTIMATE_VERSION" ]]; then
     infoprint "Updating u20..."
-    bash -c "$(curl -L "$U20_ONLINE_URL")" @ auto
+	curl -sSf "$U20_FILEURl" -o /tmp/u20tmp
+	if [ -f "/tmp/u20tmp" ]; then
+	    green "   >> U20-TEMP:$SERVERA1: DOWNLOAD: OK."
+	    if grep -q '"ULTIMATE_VERSION":' "/tmp/u20tmp"; then
+	        green "     >>> U20-TEMP:$SERVERA1:JSON file Structure Check: OK."
+			infoprint
+			cp "/tmp/u20tmp" "$U20_FILE"
+			chmod +x /tmp/u20tmp
+	    else
+	        red "     >> U20-TEMP: file Structure Check: FAILED."
+	    fi
+	else
+	    red "   >> U20-TEMP:DOWNLOAD: FAILED."
+	fi
+    bash $U20_FILE auto
 else
     infoprint "Latest update has installed.."
 fi
