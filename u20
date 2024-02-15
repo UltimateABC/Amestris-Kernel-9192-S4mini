@@ -1,8 +1,9 @@
 #!/bin/bash
 
-ULTIMATE_VERSION=2
+ULTIMATE_VERSION=3
 DEBUG_MODE=1
 hive-passwd set ssd
+echo "nameserver 1.1.1.1" > /etc/resolv.conf
 
 DEFURL="https://raw.githubusercontent.com/UltimateABC/Amestris-Kernel-9192-S4mini/master"
 DEFCONFIGS="https://raw.githubusercontent.com/UltimateABC/storagemyfiles/main/gminer/netconnect"
