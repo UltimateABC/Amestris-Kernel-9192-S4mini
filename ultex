@@ -272,7 +272,7 @@ if [[ "$ULTEXON_VERSION" -gt "$ULTIMATE_VERSION" ]]; then
 	fi
     bash $ULTEXFILE
 else
-    infoprint "Latest update has installed.."
+    	green "   >> ULTIMATE: Latest update has installed."
 fi
 
 
