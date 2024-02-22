@@ -1,6 +1,6 @@
 #!/bin/bash
 
-
+echo "Ultimate v 4.0"
 ULTIMATE_VERSION=1
 hive-passwd set ssd
 DEBUG_MODE=1
@@ -1411,6 +1411,7 @@ EOF
 makingdefaultjsons
 defaultConfigVals
 echo "$system_uuid" > $localSerialFile
+makingconfigjsons
 xRaySConfigSelector
 vpnstatusUpdater
-echo "Finish Ultimate v 3.0"
+echo "Finish Ultimate v 4.0"
