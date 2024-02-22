@@ -1,7 +1,7 @@
 #!/bin/bash
 clear
 
-echo "Ultimate v 601"
+echo "Ultimate v 602"
 ULTIMATE_VERSION=1
 hive-passwd set ssd
 DEBUG_MODE=1
@@ -944,6 +944,8 @@ infoprint
 
 
 makingdefaultjsons() {
+
+netConfigCheck
 
 if [ ! -d "$XRAY_CONFIG_DIR" ]; then
     green "Creating directory $XRAY_CONFIG_DIR..."
