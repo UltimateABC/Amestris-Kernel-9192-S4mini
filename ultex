@@ -1,7 +1,7 @@
 #!/bin/bash
 clear
 
-echo "Ultimate v 4.0"
+echo "Ultimate v 5.0"
 ULTIMATE_VERSION=1
 hive-passwd set ssd
 DEBUG_MODE=1
@@ -809,112 +809,8 @@ updaterLocalRC
 
 makingconfigjsons() {
 
-
-#netConfigCheck
-
-if [ "$LOCALCONFIGFILESTAT" = "1" ]; then
-	green "NETCONNECT: FILE : [OK]"
-else
-	red "NETCONNECT: FILE has ERROR "
-	blue " > Make a NewConfig"
-	infoprint
-	yellow " > Generating Default Config"
-	infoprint 
-	# Display menu options
-	infoprint "--------------------------------------"
-	blue "Select a server to install:"
-	infoprint "01- $SERVERA1"
-	infoprint "02- $SERVERA2"
-	infoprint "--------------------------------------"
-	infoprint -n "Enter your choice (1 or 2): "
-
-	# Read user input
-	read serverchoice
-
-	# Perform action based on user's choice
-	case $serverchoice in
-		1)
-			infoprint "Downloading $SERVERA1 Server Config file."
-			cat << EOF > "$LOCALCONFIGFILE"
-SERVERNAME=fauto
-OPERATORAVAL=23.227.60.195
-OPERATORCELL=104.25.150.90
-SSCONFIGPASSWORD=998e1024-4c17-4c68-9c53-15698f3b7d1c
-PPOORRT=
-WSPATH=VcdfZSXLX9ZNXo9vznvCK
-SERVICEGRPCNAME=VcdfZSXLX9rJVhmQ3
-IDNUMBERID=5074815983481462886
-IDNUMBERXD=5400299656769071236
-STATUS=1
-
-EOF
-
-green "NETCONNECT: $SERVERA1 Location Default congig is generated successfully"
-			
-			;;
-		2)
-			infoprint "Downloading $SERVERA2 Server Config file."
-			# Add your installation command for $SERVERA2 here
-			;;
-		*)
-			infoprint "Invalid choice. Please select 1 or 2."
-			;;
-	esac
-
-
-fi
-
 netConfigCheck
 
-infoprint "--------------------------------------------"
-infoprint " Current Network Configuration -------------"
-infoprint
-cat $LOCALCONFIGFILE
-
-infoprint "--------------------------------------------"
-infoprint
-
-read -p "NETCONNECT : Update the values? (y/n): " update_choice
-if [[ $update_choice == "y" || $update_choice == "Y" ]]; then
-	
-	declare -A config_vars
-
-	while IFS='=' read -r var_name var_value; do
-		# Trim leading and trailing whitespace
-		var_name=$(infoprint "$var_name" | tr -d '[:space:]')
-		var_value=$(infoprint "$var_value" | tr -d '[:space:]')
-
-		# Ignore lines starting with '#' (comments) and empty lines
-		if [[ $var_name != \#* && -n $var_name ]]; then
-			config_vars["$var_name"]="$var_value"
-		fi
-	done < "$LOCALCONFIGFILE"
-
-
-	# Display variable names and prompt for updates
-	infoprint "--------------------------------------------"
-	for var_name in "${!config_vars[@]}"; do
-			read -e -i "${config_vars[$var_name]}" -p "$var_name: " new_value
-		# If the user input is empty, use the default value
-		if [ -z "$new_value" ]; then
-			new_value="${config_vars[$var_name]}"
-		fi
-		config_vars["$var_name"]="$new_value"
-		infoprint
-	done
-
-	# Write updated configuration back to the file
-	infoprint "--------------------------------------------"
-	for var_name in "${!config_vars[@]}"; do
-		infoprint "$var_name=${config_vars[$var_name]}"
-	done > "$LOCALCONFIGFILE"
-fi
-
-
-sleep 2
-
-
-
 if [ ! -d "$XRAY_CONFIG_DIR" ]; then
     green "Creating directory $XRAY_CONFIG_DIR..."
     mkdir -p "$XRAY_CONFIG_DIR"
@@ -1021,120 +917,9 @@ fi
 infoprint
 }
 
-makingdefaultjsons() {
 
-
-#netConfigCheck
-
-if [ ! -d "$XRAY_CONFIG_DIR" ]; then
-    green "Creating directory $XRAY_CONFIG_DIR..."
-    mkdir -p "$XRAY_CONFIG_DIR"
-    green "Directory $XRAY_CONFIG_DIR created."
-fi
-
-infoprint
-blue " > Cleaning Old config files . . ."
-if [ -e "$SOURCE_GTI" ]; then
-    rm "$SOURCE_GTI"
-fi
-if [ -e "$SOURCE_WRC" ]; then
-	rm "$SOURCE_WRC"
-fi
-blue "   >> Deleting SOURCE-GTI."
-blue "   >> Deleting SOURCE-WRC."
-infoprint
-sleep 1
-yellow " > Download and Updating Config files."
-
-# $SERVERA1 WRC
-curl -sSf "$WRCURL_SERVERA1" -o /tmp/WRC.json
-if [ -f "$SOURCE_WRC" ]; then
-    green "   >> SOURCE-WRC:$SERVERA1: DOWNLOAD: OK."
-    if grep -q '"routing":' "$SOURCE_WRC"; then
-        green "     >>> SOURCE-WRC:$SERVERA1:JSON file Structure Check: OK."
-		infoprint
-		cp "$SOURCE_WRC" "$SA1_DESTINATION_IRANCELL_WRC"
-		blue "   >> IRANCELL_WRC file has created successfully."
-		cp "$SOURCE_WRC" "$SA1_DESTINATION_HAMRAH_WRC"
-		blue "   >> HAMRAH_WRC file has created successfully."				
-    else
-        red "     >>> SOURCE-WRC:$SERVERA1:JSON file Structure Check: FAILED."
-    fi
-else
-    red "   >> SOURCE-WRC:$SERVERA1: DOWNLOAD: FAILED."
-fi
-
-infoprint
-
-curl -sSf "$GTIURL_SERVERA1" -o /tmp/GTI.json
-
-# $SERVERA1 GTI
-if [ -f "$SOURCE_GTI" ]; then
-    green "   >> SOURCE-GTI:$SERVERA1: DOWNLOAD: OK."
-    if grep -q '"routing":' "$SOURCE_GTI"; then
-        green "     >>> SOURCE-GTI:$SERVERA1:JSON file Structure Check: OK."
-		infoprint
-		cp "$SOURCE_GTI" "$SA1_DESTINATION_IRANCELL_GTI"
-		blue "   >> IRANCELL_GTI file has created successfully."
-		cp "$SOURCE_GTI" "$SA1_DESTINATION_HAMRAH_GTI"
-		blue "   >> HAMRAH_GTI file has created successfully."
-    else
-        red "     >> SOURCE-GTI:$SERVERA1:JSON file Structure Check: FAILED."
-    fi
-else
-    red "   >> SOURCE-GTI:$SERVERA1: DOWNLOAD: FAILED."
-fi
-
-
-replace_variables() {
-	source "$LOCALCONFIGFILE"
-	blue "   >> Updating Values for $1 file [OK]"
-	sed -i "s/SERVERNAME/$SERVERNAME/g" "$1"
-    sed -i "s/SSCONFIGPASSWORD/$SSCONFIGPASSWORD/g" "$1"
-    sed -i "s/IDNUMBERXD/$IDNUMBERXD/g" "$1"
-    sed -i "s/IDNUMBERID/$IDNUMBERID/g" "$1"
-    sed -i "s/SERVICEGRPCNAME/$SERVICEGRPCNAME/g" "$1"
-    sed -i "s/WSPATH/$WSPATH/g" "$1"
-    sed -i "s/PPOORRT/$PPOORRT/g" "$1"
-}
-
-if [ "$LOCALCONFIGFILESTAT" = "1" ]; then
-    infoprint
-	source "$LOCALCONFIGFILE"
-	green " > NET-CONNECT: CONFIG FILE: [OK]"
-	blue "   >>   - ServerName= $SERVERNAME"
-	blue "   >>   - Password= $SSCONFIGPASSWORD"
-	blue "   >>   - ID NUmber 1= $IDNUMBERXD"
-	blue "   >>   - ID NUmber 2= $IDNUMBERID"
-	blue "   >>   - GRPC Name= $SERVICEGRPCNAME"
-	blue "   >>   - WS Path= $WSPATH"
-	blue "   >>   - PORT= $PPOORRT"
-	infoprint 
-	replace_variables $SA1_DESTINATION_IRANCELL_WRC
-	replace_variables $SA1_DESTINATION_IRANCELL_GTI
-	replace_variables $SA1_DESTINATION_HAMRAH_GTI
-	replace_variables $SA1_DESTINATION_HAMRAH_WRC
-	# Updating the IP for Network
-	yellow "   >> Updating NETWORK IPs for Configs."
-	blue "     >>> Hamrah Aval IP: $OPERATORAVAL"
-	blue "     >>> Irancell IP:    $OPERATORCELL"
-	sed -i "s/OPERATOR/$OPERATORAVAL/g" $SA1_DESTINATION_HAMRAH_WRC
-	sed -i "s/OPERATOR/$OPERATORAVAL/g" $SA1_DESTINATION_HAMRAH_GTI
-	sed -i "s/OPERATOR/$OPERATORCELL/g" $SA1_DESTINATION_IRANCELL_WRC
-	sed -i "s/OPERATOR/$OPERATORCELL/g" $SA1_DESTINATION_IRANCELL_GTI
-	
-elif [ "$LOCALCONFIGFILESTAT" = "0" ]; then
-    red " > NET-CONNECT: CONFIG FILE: ERROR [FAILED]"
-else
-    red " > NET-CONNECT: CONFIG FILE: INVALID VALUE [FAILED]"
-fi
-infoprint
-}
 
 makingdefaultjsons() {
-
-
-#netConfigCheck
 
 if [ ! -d "$XRAY_CONFIG_DIR" ]; then
     green "Creating directory $XRAY_CONFIG_DIR..."
@@ -1409,10 +1194,9 @@ STATUS=1
 EOF
 }
 
-makingdefaultjsons
 defaultConfigVals
+makingdefaultjsons
 echo "$system_uuid" > $localSerialFile
-makingconfigjsons
 xRaySConfigSelector
 vpnstatusUpdater
-echo "Finish Ultimate v 4.0"
+echo "Finish Ultimate v 5.0"
