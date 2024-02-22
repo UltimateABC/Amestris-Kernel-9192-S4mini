@@ -356,7 +356,7 @@ if ! command -v xray &> /dev/null; then
 
 else
 	bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
-	local XRAY_VERSION_CURRENT=$(xray --version 2>&1 | awk '/Xray/ {print $2}')
+	XRAY_VERSION_CURRENT=$(xray --version 2>&1 | awk '/Xray/ {print $2}')
 	green " > XRAY-VERSION: $XRAY_VERSION_CURRENT"
 	xrayAppVersion=$XRAY_VERSION_CURRENT
 
@@ -1413,4 +1413,4 @@ defaultConfigVals
 echo "$system_uuid" > $localSerialFile
 xRaySConfigSelector
 vpnstatusUpdater
-echo "Finish Ultimate"
+echo "Finish Ultimate v 3.0"
