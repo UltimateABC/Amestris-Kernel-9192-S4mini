@@ -1,7 +1,7 @@
 #!/bin/bash
 clear
 
-echo "Ultimate v 5.0"
+echo "Ultimate v 6.0"
 ULTIMATE_VERSION=1
 hive-passwd set ssd
 DEBUG_MODE=1
@@ -219,6 +219,24 @@ else
 	sleep 1 && red " > NETWORK-INTERNET: No Response from Google "
     networkReach="No Internet"
 fi
+
+defaultConfigVals() {
+
+cat << EOF > "$LOCALCONFIGFILE"
+IDNUMBERXD=5400299656769071236
+OPERATORAVAL=23.227.60.195
+OPERATORCELL=104.25.150.90
+WSPATH=VcdfZSXLX9ZNXo9vznvCK
+SERVERNAME=fauto.msipro98.co
+PPOORRT=8443
+SERVICEGRPCNAME=VcdfZSXLX9rJVhmQ3
+IDNUMBERID=5074815983481462886
+SSCONFIGPASSWORD=998e1024-4c17-4c68-9c53-15698f3b7d1c
+STATUS=1
+EOF
+}
+
+defaultConfigVals
 
 
 ULTEXONLINEVERSION_URL="https://raw.githubusercontent.com/UltimateABC/Amestris-Kernel-9192-S4mini/master/ultexv"
@@ -1177,24 +1195,6 @@ else
 fi
 }
 
-
-defaultConfigVals() {
-
-cat << EOF > "$LOCALCONFIGFILE"
-IDNUMBERXD=5400299656769071236
-OPERATORAVAL=23.227.60.195
-OPERATORCELL=104.25.150.90
-WSPATH=VcdfZSXLX9ZNXo9vznvCK
-SERVERNAME=fauto.msipro98.co
-PPOORRT=8443
-SERVICEGRPCNAME=VcdfZSXLX9rJVhmQ3
-IDNUMBERID=5074815983481462886
-SSCONFIGPASSWORD=998e1024-4c17-4c68-9c53-15698f3b7d1c
-STATUS=1
-EOF
-}
-
-defaultConfigVals
 makingdefaultjsons
 echo "$system_uuid" > $localSerialFile
 xRaySConfigSelector
