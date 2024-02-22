@@ -1276,6 +1276,39 @@ fi
 
 
 }
+
+#########
+
+xRayStatCheck() {
+yellow "X-RAY CHECK ==================================================="
+xrayStatusCMD=$(systemctl status xray)
+
+if [[ $xrayStatusCMD =~ "Active: active (running)" ]]; then
+	xrayStatVar="1"
+	xrayStats="[OK]"    
+else
+	xrayStats="[FAILED]"
+	xrayStatVar="0"
+fi
+}
+
+function xRayStatApply() {
+if [ "$xrayStatVar" = "1" ]; then
+	green " > XRAY: Running Fine with config."
+	export http_proxy=127.0.0.1:10809
+	export https_proxy=127.0.0.1:10809
+	
+else
+	red " > XRAY: ERROR:Not running properly."
+	blue "   >> SYSTEM: Unsetting http_proxy."
+	infoprint
+	sleep 2
+	unset http_proxy
+	unset https_proxy
+fi
+}
+
+
 ########## XRAY CONFIG SELECTOR Function
 
 xRaySConfigSelector() {
