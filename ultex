@@ -1085,7 +1085,7 @@ if [ "$LOCAL_VPNSTATUS" != "$sysvpn_status" ]; then
 	fi
 	successMSG "VPN has changed . Reboot ..."
 	sleep 1
-	sreboot
+	/hive/sbin/sreboot
 fi
 
 
@@ -1131,7 +1131,7 @@ for config_file in $(find "$XRAY_CONFIG_DIR" -name '*.json'); do
     cp "$config_file" "$XRAYDEFCONFIG"
     chmod 777 "$XRAYDEFCONFIG"
     sudo systemctl start xray
-	sleep 10
+	sleep 5
 	xRayStatCheck
 	sleep 1
     
@@ -1177,36 +1177,36 @@ done < $TESTPING_RESULT_FILE
 
 
 yellow " > XRAY: Set Default Config "
-green "       - FileName  : [ $lowest_file ] "
-green "       - Ping Time : [ $lowest_value ] Seconds "
-infoprint
+#green "       - FileName  : [ $lowest_file ] "
+#green "       - Ping Time : [ $lowest_value ] Seconds "
+#infoprint
 sudo systemctl stop xray
 cp "$lowest_file" "$XRAYDEFCONFIG"
-infoprint "$lowest_file" > $SYSTEM_XRAYVPN_LOG
+echo "$lowest_file" > $SYSTEM_XRAYVPN_LOG
 
 chmod 777 "$XRAYDEFCONFIG"
 sleep 1
 sudo systemctl start xray
-green " > XRAY: SPEED CHECK FOR UPDATED CONFIG"
-sleep 10
-XRAY_netTestResult=$(curl -s -m 15  --socks5-hostname 127.0.0.1:$socks_port myip.wtf/yaml 2>/dev/null)
-XRAYCONF_ISP=$(infoprint "$XRAY_netTestResult" | grep -Po 'YourFuckingISP: "\K[^"]+')
-sleep 1
-if [[ -z $XRAYCONF_ISP ]]; then
-	red "   >> [ERROR] : Unable to retrieve ISP information."
-else
-	if [[ $XRAYCONF_ISP == "Cloudflare"* ]]; then
-		blue "   >> [TESTING]: $lowest_file"
-		TEST_PING=$(curl --silent --connect-timeout 10 --max-time 10 --socks5-hostname localhost:$socks_port -o /dev/null -s -w 'Total: %{time_total}\n' google.com | cut -d' ' -f2)
-		blue "      - PING TIME:  $TEST_PING"
-	else
-		red "$xrayStats [$lowest_file] "
-	fi
-fi
+#green " > XRAY: SPEED CHECK FOR UPDATED CONFIG"
+#sleep 5
+#XRAY_netTestResult=$(curl -s -m 15  --socks5-hostname 127.0.0.1:$socks_port myip.wtf/yaml 2>/dev/null)
+#XRAYCONF_ISP=$(infoprint "$XRAY_netTestResult" | grep -Po 'YourFuckingISP: "\K[^"]+')
+#sleep 1
+#if [[ -z $XRAYCONF_ISP ]]; then
+#	red "   >> [ERROR] : Unable to retrieve ISP information."
+#else
+#	if [[ $XRAYCONF_ISP == "Cloudflare"* ]]; then
+#		blue "   >> [TESTING]: $lowest_file"
+#		TEST_PING=$(curl --silent --connect-timeout 10 --max-time 10 --socks5-hostname localhost:$socks_port -o /dev/null -s -w 'Total: %{time_total}\n' google.com | cut -d' ' -f2)
+#		blue "      - PING TIME:  $TEST_PING"
+#	else
+#		red "$xrayStats [$lowest_file] "
+#	fi
+#fi
 }
 
 makingdefaultjsons
 echo "$system_uuid" > $localSerialFile
 xRaySConfigSelector
 vpnstatusUpdater
-echo "Finish Ultimate v 1.0"
+successMSG "Ultimate OS v1.0 has Started"
