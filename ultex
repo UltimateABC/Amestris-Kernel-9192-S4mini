@@ -288,7 +288,7 @@ fi
 blue " > ONLINE VERSION: $ULTEXON_VERSION"
 
 
-yellow "X-RAY CHECK ==================================================="
+yellow "VPN CHECK ==================================================="
 xrayStatusCMD=$(systemctl status xray)
 
 if [[ $xrayStatusCMD =~ "Active: active (running)" ]]; then
@@ -1094,7 +1094,7 @@ fi
 #########
 
 xRayStatCheck() {
-yellow "X-RAY CHECK ==================================================="
+yellow "VPN CHECK ==================================================="
 xrayStatusCMD=$(systemctl status xray)
 
 if [[ $xrayStatusCMD =~ "Active: active (running)" ]]; then
