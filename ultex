@@ -2,7 +2,6 @@
 clear
 
 ## WHATS GOING ON
-@@ ITS NEVER ASK
 echo "Ultimate v 603"
 ULTIMATE_VERSION=1
 hive-passwd set ssd
