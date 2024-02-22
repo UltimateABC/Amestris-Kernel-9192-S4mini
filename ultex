@@ -2,7 +2,7 @@
 clear
 
 ## WHATS GOING ON
-echo "Ultimate v 603"
+echo "Ultimate v 604"
 ULTIMATE_VERSION=1
 hive-passwd set ssd
 DEBUG_MODE=1
@@ -123,6 +123,15 @@ ULTEXFILE="/hive/bin/ultex"
 LOCAL_VPNSTATUS=$(grep "^STATUS=" "$LOCALCONFIGFILE" | cut -d'=' -f2)
 SERVERA1="FRANCE"
 SERVERA2="TURKEY"
+
+if [ -e "$ULTEXFILE" ]; then
+	ULTIMATE_BIN_VERSION=$(grep "^ULTIMATE_VERSION=" "$ULTEXFILE" | cut -d'=' -f2)
+	SYSTEMBIN=1
+else
+	ULTIMATE_BIN_VERSION="Not Installed"
+	SYSTEMBIN=0
+fi
+
 
 # BOOT TIME
 boot_time=$(( `date +%s` - `awk '{printf "%d", $1}' /proc/uptime` ))
