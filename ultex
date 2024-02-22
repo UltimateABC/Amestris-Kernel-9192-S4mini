@@ -2,7 +2,7 @@
 clear
 
 ## WHATS GOING ON
-echo "Ultimate v 100"
+echo "Ultimate v 101"
 ULTIMATE_VERSION=1
 /hive/sbin/hive-passwd set ssd
 DEBUG_MODE=1
@@ -377,12 +377,12 @@ if ! command -v xray &> /dev/null; then
 	red " > XRAY-VERSION: Not installed."
 	xrayAppVersion="Not installed"
 	green "Installing XRAY Latest Version"
-	bash -c "$(curl -s -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
-	bash -c "$(curl -s -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install-geodata
+	bash -c "$(curl -s -m 15 -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
+	bash -c "$(curl -s -m 15 -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install-geodata
 	systemctl enable xray
 	systemctl start xray
 else
-	bash -c "$(curl -s -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
+	bash -c "$(curl -s -m 10 -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
 	XRAY_VERSION_CURRENT=$(xray --version 2>&1 | awk '/Xray/ {print $2}')
 	green " > XRAY-VERSION: $XRAY_VERSION_CURRENT"
 	xrayAppVersion=$XRAY_VERSION_CURRENT
