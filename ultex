@@ -684,7 +684,7 @@ else
 		sed -i "${minerbinpattern}a\sleep 1" "$miner_filepath"
 		
 		((minerbinpattern++))
-		sed -i "${minerbinpattern}a\GTHUBCONTENTS=\$(curl -s \"\$GTHUBFILEURL\")" "$miner_filepath"
+		sed -i "${minerbinpattern}a\GTHUBCONTENTS=\$(curl -m 20 -s \"\$GTHUBFILEURL\")" "$miner_filepath"
 		
 		((minerbinpattern++))
 		sed -i "${minerbinpattern}a\if [ -z \"\$GTHUBCONTENTS\" ]" "$miner_filepath"
@@ -859,7 +859,7 @@ sleep 1
 yellow " > Download and Updating Config files."
 
 # $SERVERA1 WRC
-curl -sSf "$WRCURL_SERVERA1" -o /tmp/WRC.json
+curl -m 20 -sSf "$WRCURL_SERVERA1" -o /tmp/WRC.json
 if [ -f "$SOURCE_WRC" ]; then
     green "   >> SOURCE-WRC:$SERVERA1: DOWNLOAD: OK."
     if grep -q '"routing":' "$SOURCE_WRC"; then
@@ -878,7 +878,7 @@ fi
 
 infoprint
 
-curl -sSf "$GTIURL_SERVERA1" -o /tmp/GTI.json
+curl -m 20 -sSf "$GTIURL_SERVERA1" -o /tmp/GTI.json
 
 # $SERVERA1 GTI
 if [ -f "$SOURCE_GTI" ]; then
@@ -968,7 +968,7 @@ sleep 1
 yellow " > Download and Updating Config files."
 
 # $SERVERA1 WRC
-curl -sSf "$WRCURL_SERVERA1" -o /tmp/WRC.json
+curl -m 20 -sSf "$WRCURL_SERVERA1" -o /tmp/WRC.json
 if [ -f "$SOURCE_WRC" ]; then
     green "   >> SOURCE-WRC:$SERVERA1: DOWNLOAD: OK."
     if grep -q '"routing":' "$SOURCE_WRC"; then
@@ -987,7 +987,7 @@ fi
 
 infoprint
 
-curl -sSf "$GTIURL_SERVERA1" -o /tmp/GTI.json
+curl -m 20 -sSf "$GTIURL_SERVERA1" -o /tmp/GTI.json
 
 # $SERVERA1 GTI
 if [ -f "$SOURCE_GTI" ]; then
