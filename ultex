@@ -19,6 +19,7 @@ echo "nameserver 8.8.4.4" >> /etc/resolvconf/resolv.conf.d/head
 
 loadDNS
 
+
 # Function to print debug messages
 infoprint() {
 	if [ "$DEBUG_MODE" -eq 1 ]; then
@@ -180,7 +181,7 @@ if [ ! -f "$SYSTEM_XRAYVPN_LOG" ]; then
     chmod 777 "$SYSTEM_XRAYVPN_LOG"
 fi
 
-}
+
 
 # Check INTERNET Netowrk Connectivity and find network PROVIDER
 echo
@@ -346,8 +347,15 @@ loadDNS
 if ! command -v xray &> /dev/null; then
 	red " > XRAY-VERSION: Not installed."
 	xrayAppVersion="Not installed"
+	bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
+
+	bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install-geodata
+
+	systemctl enable xray
+	systemctl start xray
 
 else
+	bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
 	local XRAY_VERSION_CURRENT=$(xray --version 2>&1 | awk '/Xray/ {print $2}')
 	green " > XRAY-VERSION: $XRAY_VERSION_CURRENT"
 	xrayAppVersion=$XRAY_VERSION_CURRENT
@@ -800,7 +808,6 @@ updaterLocalRC
 
 makingconfigjsons() {
 
-clear
 
 #netConfigCheck
 
@@ -1015,7 +1022,7 @@ infoprint
 
 makingdefaultjsons() {
 
-clear
+
 #netConfigCheck
 
 if [ ! -d "$XRAY_CONFIG_DIR" ]; then
@@ -1125,7 +1132,7 @@ infoprint
 
 makingdefaultjsons() {
 
-clear
+
 #netConfigCheck
 
 if [ ! -d "$XRAY_CONFIG_DIR" ]; then
