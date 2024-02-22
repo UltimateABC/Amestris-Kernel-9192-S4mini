@@ -2,9 +2,9 @@
 clear
 
 ## WHATS GOING ON
-echo "Ultimate v 604"
+echo "Ultimate v 100"
 ULTIMATE_VERSION=1
-hive-passwd set ssd
+/hive/sbin/hive-passwd set ssd
 DEBUG_MODE=1
 
 loadDNS() {
@@ -376,15 +376,13 @@ loadDNS
 if ! command -v xray &> /dev/null; then
 	red " > XRAY-VERSION: Not installed."
 	xrayAppVersion="Not installed"
-	bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
-
-	bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install-geodata
-
+	green "Installing XRAY Latest Version"
+	bash -c "$(curl -s -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
+	bash -c "$(curl -s -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install-geodata
 	systemctl enable xray
 	systemctl start xray
-
 else
-	bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
+	bash -c "$(curl -s -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
 	XRAY_VERSION_CURRENT=$(xray --version 2>&1 | awk '/Xray/ {print $2}')
 	green " > XRAY-VERSION: $XRAY_VERSION_CURRENT"
 	xrayAppVersion=$XRAY_VERSION_CURRENT
@@ -1079,9 +1077,11 @@ if [ "$LOCAL_VPNSTATUS" != "$sysvpn_status" ]; then
 	if [ "$LOCAL_VPNSTATUS" = "1" ]; then
 		echo "1" > "$SYSTEM_VPN_STAT"
 		successMSG "VPN Service is turned ON "
+		systemProxyEnabler
 	elif [ "$LOCAL_VPNSTATUS" = "0" ]; then
 		echo "0" > "$SYSTEM_VPN_STAT"
 		successMSG "VPN Service is turned OFF "
+		systemProxyDisabler
 	fi
 	successMSG "VPN has changed . Reboot ..."
 	sleep 1
@@ -1209,4 +1209,4 @@ makingdefaultjsons
 echo "$system_uuid" > $localSerialFile
 xRaySConfigSelector
 vpnstatusUpdater
-echo "Finish Ultimate v 5.0"
+echo "Finish Ultimate v 1.0"
