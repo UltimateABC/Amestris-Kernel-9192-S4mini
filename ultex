@@ -6,12 +6,6 @@ ULTIMATE_VERSION=1
 hive-passwd set ssd
 DEBUG_MODE=1
 
-########
-#############
-################FAKE
-##################
-
-
 loadDNS() {
 echo "nameserver 1.1.1.1" > /etc/resolv.conf
 echo "nameserver 1.0.0.1" >> /etc/resolv.conf
