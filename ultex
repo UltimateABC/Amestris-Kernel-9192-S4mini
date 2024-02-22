@@ -1,4 +1,5 @@
 #!/bin/bash
+clear
 
 echo "Ultimate v 4.0"
 ULTIMATE_VERSION=1
