@@ -828,7 +828,7 @@ else
     echo "##!/bin/sh -e" >> "$rclocal_filepath"
 	echo "" >> $rclocal_filepath
 	echo "#SOCKSULTIMATE-BOOTEX" >> $rclocal_filepath
-	echo "ultexbootfile=/"/root/ultex.boot/"" >> $rclocal_filepath
+	echo "ultexbootfile=/root/ultex.boot" >> $rclocal_filepath
 	echo "" >> $rclocal_filepath
 	
 	echo "" >> $rclocal_filepath
