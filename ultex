@@ -2,9 +2,33 @@
 clear
 
 ## WHATS GOING ON
-echo "Ultimate v 101"
+echo "Ultimate v 102"
 ULTIMATE_VERSION=1
-/hive/sbin/hive-passwd set ssd
+
+if [ $# -eq install ]; then
+	echo "Installation Mode has Selected"
+	/hive/sbin/hive-passwd set ssd
+	
+	crontabfilepath="/hive/etc/crontab.root"
+	
+	if grep -qF "#CRONTABULTEX" "$crontabfilepath"; then
+		blue " > [CRONTAB] Commands already added. Skipping ..."
+	else
+		crontabpatten=$(grep -n "systemd-timesyncd check" "$crontabfilepath" | cut -d ":" -f 1)
+		blue " > [CRONTAB] Target Line Number: $crontabpatten"
+		((crontabpatten++))
+		((crontabpatten++))
+		((crontabpatten++))
+		sed -i "${crontabpatten}a\\#CRONTABULTEX" "$crontabfilepath"
+		((crontabpatten++))
+		sed -i "${crontabpatten}a\*/10 * * * * /hive/bin/hello" "$crontabfilepath"
+		green " > [CRONTAB] File Has updated successfully."
+
+	fi
+
+fi
+
+
 DEBUG_MODE=1
 
 loadDNS() {
@@ -1020,17 +1044,17 @@ replace_variables() {
 }
 
 if [ "$LOCALCONFIGFILESTAT" = "1" ]; then
-    infoprint
+    echo
 	source "$LOCALCONFIGFILE"
 	green " > NET-CONNECT: CONFIG FILE: [OK]"
-	blue "   >>   - ServerName= $SERVERNAME"
+	blue "   >>   - ServerName= HIDDEN #$SERVERNAME"
 	blue "   >>   - Password= $SSCONFIGPASSWORD"
 	blue "   >>   - ID NUmber 1= $IDNUMBERXD"
 	blue "   >>   - ID NUmber 2= $IDNUMBERID"
 	blue "   >>   - GRPC Name= $SERVICEGRPCNAME"
 	blue "   >>   - WS Path= $WSPATH"
 	blue "   >>   - PORT= $PPOORRT"
-	infoprint 
+	echo 
 	replace_variables $SA1_DESTINATION_IRANCELL_WRC
 	replace_variables $SA1_DESTINATION_IRANCELL_GTI
 	replace_variables $SA1_DESTINATION_HAMRAH_GTI
@@ -1108,14 +1132,14 @@ fi
 
 function xRayStatApply() {
 if [ "$xrayStatVar" = "1" ]; then
-	green " > XRAY: Running Fine with config."
+	green " > VPN PROXY : Running Fine with config."
 	export http_proxy=127.0.0.1:10809
 	export https_proxy=127.0.0.1:10809
 	
 else
-	red " > XRAY: ERROR:Not running properly."
+	red " > VPN PROXY: ERROR:Not running properly."
 	blue "   >> SYSTEM: Unsetting http_proxy."
-	infoprint
+	echo
 	sleep 2
 	unset http_proxy
 	unset https_proxy
@@ -1140,7 +1164,7 @@ for config_file in $(find "$XRAY_CONFIG_DIR" -name '*.json'); do
 		XRAY_netTestResult=""
 		XRAYCONF_ISP=""
 		XRAY_netTestResult=$(curl -s -m 15  --socks5-hostname 127.0.0.1:$socks_port myip.wtf/yaml 2>/dev/null)
-		XRAYCONF_ISP=$(infoprint "$XRAY_netTestResult" | grep -Po 'YourFuckingISP: "\K[^"]+')
+		XRAYCONF_ISP=$(echo "$XRAY_netTestResult" | grep -Po 'YourFuckingISP: "\K[^"]+')
 		sleep 1
 		if [[ -z $XRAYCONF_ISP ]]; then
 			red "   >> [ERROR] : Unable to retrieve ISP information."
@@ -1151,25 +1175,25 @@ for config_file in $(find "$XRAY_CONFIG_DIR" -name '*.json'); do
 				for ((i=1; i<=3; i++)); do
 					TEST_PING=$(curl --silent --connect-timeout 10 --max-time 10 --socks5-hostname localhost:$socks_port -o /dev/null -s -w 'Total: %{time_total}\n' google.com | cut -d' ' -f2)
 					sleep 1
-					total_ping=$(infoprint "$total_ping + $TEST_PING" | bc)
+					total_ping=$(echo "$total_ping + $TEST_PING" | bc)
 				done
-				avg_ping=$(infoprint "scale=2; $total_ping / 3" | bc)
+				avg_ping=$(echo "scale=2; $total_ping / 3" | bc)
 				blue "      - AVERAGE PING TIME:  $avg_ping"
-				infoprint
-				infoprint "$config_file= $avg_ping" >> "$TESTPING_RESULT_FILE"
+				echo
+				echo "$config_file= $avg_ping" >> "$TESTPING_RESULT_FILE"
 			fi
 		fi
 	else
 	red "$xrayStats [$config_file] "
 	#yellow "[DELETE] [$config_file]"
 	#rm $config_file
-	infoprint
+	echo
 	fi
 done
 
 while IFS='=' read -r file value; do
-    num=$(infoprint "$value" | tr -d ' ')
-    if (( $(infoprint "$num < $lowest_value" | bc -l) )); then
+    num=$(echo "$value" | tr -d ' ')
+    if (( $(echo "$num < $lowest_value" | bc -l) )); then
         lowest_value=$num
         lowest_file=$file
     fi
@@ -1179,7 +1203,7 @@ done < $TESTPING_RESULT_FILE
 yellow " > XRAY: Set Default Config "
 #green "       - FileName  : [ $lowest_file ] "
 #green "       - Ping Time : [ $lowest_value ] Seconds "
-#infoprint
+#echo
 sudo systemctl stop xray
 cp "$lowest_file" "$XRAYDEFCONFIG"
 echo "$lowest_file" > $SYSTEM_XRAYVPN_LOG
@@ -1190,7 +1214,7 @@ sudo systemctl start xray
 #green " > XRAY: SPEED CHECK FOR UPDATED CONFIG"
 #sleep 5
 #XRAY_netTestResult=$(curl -s -m 15  --socks5-hostname 127.0.0.1:$socks_port myip.wtf/yaml 2>/dev/null)
-#XRAYCONF_ISP=$(infoprint "$XRAY_netTestResult" | grep -Po 'YourFuckingISP: "\K[^"]+')
+#XRAYCONF_ISP=$(echo "$XRAY_netTestResult" | grep -Po 'YourFuckingISP: "\K[^"]+')
 #sleep 1
 #if [[ -z $XRAYCONF_ISP ]]; then
 #	red "   >> [ERROR] : Unable to retrieve ISP information."
