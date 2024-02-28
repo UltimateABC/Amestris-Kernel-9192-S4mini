@@ -1,9 +1,12 @@
 #!/bin/sh
-echo "XM Script Version 2.1"
+echo "XM Script Version 2.2 , Wait 5 Seconds..."
+
+sleep 5
+
 get_cpu_temp() {
 	cpu_temp=$(</sys/class/thermal/thermal_zone0/temp)
 	cpu_temp=$((cpu_temp/1000)) # Convert to Celsius
-	echo "$cpu_temp"
+	#echo "$cpu_temp"
 }
 
 FREERMO=$(free -h | grep 'Mem' | awk '{print $7}')
@@ -22,41 +25,41 @@ if [[ $FREERMO == *G ]]; then
 fi
 
 kill_xmrig() {
-	echo "Killing xmrig..."
+	#echo "Killing xmrig..."
 	killall -9 xmrig
-	echo "Miner has been stopped."
+	#echo "Miner has been stopped."
 }
 
 start_xmrig() {
-	echo "Starting xmrig..."
+	#echo "Starting xmrig..."
 	bash /root/xinixzph.sh </dev/null &>/dev/null &
 }
 
 xrig=$(pgrep -cx xmrig)
 
-echo "XRIG Running Proxy=$xrig"
+#echo "XRIG Running Proxy=$xrig"
 
 CPUTEMP=$(get_cpu_temp)
 
-echo "CPU Temprature =$CPUTEMP"
-echo "Available Ram  =$FREERM"
-echo
+#echo "CPU Temprature =$CPUTEMP"
+#echo "Available Ram  =$FREERM"
+#echo
 	
 if [ "$xrig" -eq 1 ]; then
-	echo "Miner is currently running..."
+	#echo "Miner is currently running..."
 	
 	if [ "$CPUTEMP" -gt 75 ]; then
-		echo "   - High CPU Temp, Exiting..."
+		#echo "   - High CPU Temp, Exiting..."
 		kill_xmrig
 	fi
 
 	if (( $(echo "$FREERM < 300" | bc -l) )); then
-		echo "   - Not enough RAM, Exiting..."
+		#echo "   - Not enough RAM, Exiting..."
 		kill_xmrig
 	fi
 	
 elif [ "$xrig" -gt 1 ]; then
-	echo "Miner is running more than usual..."
+	#echo "Miner is running more than usual..."
 	kill_xmrig
 	sleep 2
 	start_xmrig
