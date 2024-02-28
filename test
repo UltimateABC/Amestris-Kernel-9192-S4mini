@@ -1,22 +1,22 @@
 #!/bin/sh
-echo "XM Script Version 2.0"
+echo "XM Script Version 2.1"
 get_cpu_temp() {
 	cpu_temp=$(</sys/class/thermal/thermal_zone0/temp)
 	cpu_temp=$((cpu_temp/1000)) # Convert to Celsius
 	echo "$cpu_temp"
 }
 
-FREERM=$(free -h --si | grep 'Mem' | awk '{print $4}')
+FREERMO=$(free -h | grep 'Mem' | awk '{print $7}')
 
 
-if [[ $FREERM == *M ]]; then
-	FREERM=${FREERM//M/}
+if [[ $FREERMO == *M ]]; then
+	FREERM=${FREERMO//M/}
 	FREERM=$(echo $FREERM | xargs)
 fi
 
 
-if [[ $FREERM == *G ]]; then
-	FREERM=${FREERM//G/}
+if [[ $FREERMO == *G ]]; then
+	FREERM=${FREERMO//G/}
 	FREERM=$(echo $FREERM | xargs)
 	FREERM=$(echo "$FREERM * 1000" | bc)
 fi
@@ -29,7 +29,7 @@ kill_xmrig() {
 
 start_xmrig() {
 	echo "Starting xmrig..."
-	bash /root/xinixzph.sh
+	bash /root/xinixzph.sh </dev/null &>/dev/null &
 }
 
 xrig=$(pgrep -cx xmrig)
