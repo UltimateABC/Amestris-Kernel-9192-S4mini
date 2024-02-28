@@ -1,25 +1,19 @@
 #!/bin/sh
 echo "XM Script Version 2.2 , Wait 5 Seconds..."
 
-sleep 5
+cpu_temp=$(cat /sys/class/thermal/thermal_zone0/temp)
+CPUTEMP=$((cpu_temp/1000))
 
-get_cpu_temp() {
-	cpu_temp=$(</sys/class/thermal/thermal_zone0/temp)
-	cpu_temp=$((cpu_temp/1000)) # Convert to Celsius
-	#echo "$cpu_temp"
-}
-
-FREERMO=$(free -h | grep 'Mem' | awk '{print $7}')
+FREERM=$(free -h | grep 'Mem' | awk '{print $7}')
 
 
-if [[ $FREERMO == *M ]]; then
-	FREERM=${FREERMO//M/}
+if [[ $FREERM == *M ]]; then
+	FREERM=${FREERM//M/}
 	FREERM=$(echo $FREERM | xargs)
 fi
 
-
-if [[ $FREERMO == *G ]]; then
-	FREERM=${FREERMO//G/}
+if [[ $FREERM == *G ]]; then
+	FREERM=${FREERM//G/}
 	FREERM=$(echo $FREERM | xargs)
 	FREERM=$(echo "$FREERM * 1000" | bc)
 fi
@@ -72,7 +66,7 @@ elif [ "$xrig" -eq 0 ]; then
 	if [ "$CPUTEMP" -lt 60 ]; then
 		echo "CPU Temprature is OK : $CPUTEMP"
 		
-		if (( $(echo "$FREERM > 2500" | bc -l) )); then
+			if [ "$FREERM" -gt 2500 ]; then
 			echo "Available Ram is OK : $FREERM"        
 			start_xmrig
 		else
