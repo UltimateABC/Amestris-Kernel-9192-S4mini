@@ -23,7 +23,7 @@ fi
 
 kill_xmrig() {
 	echo "Killing xmrig..."
-	pkill -9 xmrig  # Replaced killall with pkill
+	killall -9 xmrig
 	echo "Miner has been stopped."
 }
 
