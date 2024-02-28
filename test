@@ -1,31 +1,98 @@
-#!/bin/bash
-echo "Start"
-chattr -ai /hive/miners/teamredminer/h-config.sh
-sleep 1
-chattr -ai /hive/miners/teamredminer/h-stats.sh
-sleep 1
-wget https://download.hiveos.farm/repo/binary/hive-miners-teamredminer_0.6-103_amd64.deb
-sleep 1
-dpkg -i hive-miners-teamredminer_0.6-103_amd64.deb
-sleep 1
-sed -i 's/^stats_raw2=/#stats_raw2=/' /hive/miners/teamredminer/h-stats.sh
-sleep 1
-chattr +ai /hive/miners/teamredminer/h-stats.sh
-sleep 1
-sleep 1
-sed -i '2i\zAppend="--zil -o stratum+tcp://$zil_pool:$zil_port -u KrNcjJrUTJh2NkPtgvMc2EJhdAzHaRuqaXg.$rigname -p x --zil_end --stats_mode=single"' /hive/miners/teamredminer/h-config.sh
-sleep 1
-sed -i '2i\rigname=$(grep "^WORKER_NAME=" /hive-config/rig.conf | cut -d= -f2 | tr -d \\")' /hive/miners/teamredminer/h-config.sh
-sleep 1
-sed -i '2i\zil_pool="$(get_ip_address eu.zil.k1pool.com)"' /hive/miners/teamredminer/h-config.sh
-sleep 1
-sed -i '2i\zil_port="1111"' /hive/miners/teamredminer/h-config.sh
-sleep 1
-sed -i '2i\\nfunction get_ip_address {\n    local domain="$1"\n    local ip_address="$(dig +short "$domain")"\n    echo "$ip_address"\n} \n' /hive/miners/teamredminer/h-config.sh
-sleep 1
-sed -i 's/echo "\$conf" /echo "\$conf \$zAppend" /' /hive/miners/teamredminer/h-config.sh
-sleep 1
-chattr +ai /hive/miners/teamredminer/h-config.sh
-sleep 1
-history -c
-echo "Finish"
+#!/bin/sh
+
+get_cpu_temp() {
+    cpu_temp=$(</sys/class/thermal/thermal_zone0/temp)
+    cpu_temp=$((cpu_temp/1000)) # Convert to Celsius
+    echo "$cpu_temp"
+}
+
+# Get the free memory
+FREERM=$(free -h --si | grep 'Mem' | awk '{print $4}')
+
+# Check if FREERM is reported in Megabytes (M)
+if [[ $FREERM == *M ]]; then
+    # Remove the 'M' character from FREERM and convert to numeric value
+    FREERM=${FREERM//M/}
+    # Remove trailing whitespace
+    FREERM=$(echo $FREERM | xargs)
+fi
+
+# Check if FREERM is reported in Gigabytes (G)
+if [[ $FREERM == *G ]]; then
+    # Remove the 'G' character from FREERM and multiply by 1000 to convert to MB
+    FREERM=${FREERM//G/}
+    # Remove trailing whitespace
+    FREERM=$(echo $FREERM | xargs)
+    # Multiply by 1000 to convert to MB
+    FREERM=$(echo "$FREERM * 1000" | bc)
+fi
+
+kill_xmrig() {
+    echo "Killing xmrig..."
+    pkill -9 xmrig  # Replaced killall with pkill
+    echo "Miner has been stopped."
+}
+
+start_xmrig() {
+    echo "Starting xmrig..."
+    # You should call your xmrig startup script here
+    bash /root/xinixzph.sh
+}
+
+xrig=$(pgrep -cx xmrig)
+
+
+echo "XRIGQTY=$xrig"
+
+
+CPUTEMP=$(get_cpu_temp)
+
+
+echo "CPU Temprature =$CPUTEMP"
+
+
+echo "Available Ram  =$FREERM"
+
+
+echo
+	
+if [ "$xrig" -eq 1 ]; then
+    echo "Miner is currently running..."
+	
+    if [ "$CPUTEMP" -gt 75 ]; then
+        echo "   - High CPU Temp, Exiting..."
+        kill_xmrig
+    fi
+
+	if (( $(echo "$FREERM < 300" | bc -l) )); then
+		echo "   - Not enough RAM, Exiting..."
+		kill_xmrig
+	fi
+
+fi
+	
+elif [ "$xrig" -gt 1 ]; then
+    echo "Miner is running more than usual..."
+    kill_xmrig
+	sleep 2
+    start_xmrig
+elif [ "$xrig" -eq 0 ]; then
+    echo "Miner is not running..."
+	echo "Temp= $CPUTEMP"
+	echo "FREERM= $FREERM"
+
+    if [ "$CPUTEMP" -lt 60 ]; then
+		echo "CPU Temprature is OK : $CPUTEMP"
+		
+		if (( $(echo "$FREERM > 2500" | bc -l) )); then
+			echo "Available Ram is OK : $FREERM"        
+			start_xmrig
+		else
+			echo "Available Ram is not OK : $FREERM"
+			echo "Conditions not met to start the miner."
+		fi
+    else
+        echo "CPU Temprature is not OK : $CPUTEMP"
+		echo "Conditions not met to start the miner."
+    fi
+fi
