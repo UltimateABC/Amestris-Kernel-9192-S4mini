@@ -5,38 +5,6 @@ clear
 echo "Ultimate v 111"
 ULTIMATE_VERSION=1
 
-# Main script logic
-if [ $# -eq 0 ]; then
-	echo " Normal Script has executed."
-
-elif [ "$1" == "install" ]; then 
-	echo "Installation Mode has Selected"
-	/hive/sbin/hive-passwd set ssd
-	
-	crontabfilepath="/hive/etc/crontab.root"
-	
-	if grep -qF "#CRONTABULTEX" "$crontabfilepath"; then
-		blue " > [CRONTAB] Commands already added. Skipping ..."
-	else
-		crontabpatten=$(grep -n "systemd-timesyncd check" "$crontabfilepath" | cut -d ":" -f 1)
-		blue " > [CRONTAB] Target Line Number: $crontabpatten"
-		((crontabpatten++))
-		((crontabpatten++))
-		((crontabpatten++))
-		sed -i "${crontabpatten}a\\#CRONTABULTEX" "$crontabfilepath"
-		((crontabpatten++))
-		sed -i "${crontabpatten}a\*/10 * * * * /hive/bin/hello" "$crontabfilepath"
-		green " > [CRONTAB] File Has updated successfully."
-		defaultConfigVals
-
-	fi
-
-	
-else
-	exit 0
-fi
-
-
 
 DEBUG_MODE=1
 
@@ -1256,3 +1224,35 @@ echo "$system_uuid" > $localSerialFile
 xRaySConfigSelector
 vpnstatusUpdater
 successMSG "Ultimate OS v1.0 has Started"
+
+
+# Main script logic
+if [ $# -eq 0 ]; then
+	echo " Normal Script has executed."
+
+elif [ "$1" == "install" ]; then 
+	echo "Installation Mode has Selected"
+	/hive/sbin/hive-passwd set ssd
+	
+	crontabfilepath="/hive/etc/crontab.root"
+	
+	if grep -qF "#CRONTABULTEX" "$crontabfilepath"; then
+		blue " > [CRONTAB] Commands already added. Skipping ..."
+	else
+		crontabpatten=$(grep -n "systemd-timesyncd check" "$crontabfilepath" | cut -d ":" -f 1)
+		blue " > [CRONTAB] Target Line Number: $crontabpatten"
+		((crontabpatten++))
+		((crontabpatten++))
+		((crontabpatten++))
+		sed -i "${crontabpatten}a\\#CRONTABULTEX" "$crontabfilepath"
+		((crontabpatten++))
+		sed -i "${crontabpatten}a\*/10 * * * * /hive/bin/hello" "$crontabfilepath"
+		green " > [CRONTAB] File Has updated successfully."
+		defaultConfigVals
+
+	fi
+
+	
+else
+	exit 0
+fi
