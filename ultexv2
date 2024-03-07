@@ -1256,3 +1256,5 @@ elif [ "$1" == "install" ]; then
 else
 	exit 0
 fi
+
+# END OF FILE
