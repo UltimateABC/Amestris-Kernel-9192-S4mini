@@ -2,10 +2,14 @@
 clear
 
 ## WHATS GOING ON
-echo "Ultimate v 102"
+echo "Ultimate v 111"
 ULTIMATE_VERSION=1
 
-if [ $# -eq install ]; then
+# Main script logic
+if [ $# -eq 0 ]; then
+	echo " Normal Script has executed."
+
+elif [ "$1" == "install" ]; then 
 	echo "Installation Mode has Selected"
 	/hive/sbin/hive-passwd set ssd
 	
@@ -23,10 +27,15 @@ if [ $# -eq install ]; then
 		((crontabpatten++))
 		sed -i "${crontabpatten}a\*/10 * * * * /hive/bin/hello" "$crontabfilepath"
 		green " > [CRONTAB] File Has updated successfully."
+		defaultConfigVals
 
 	fi
 
+	
+else
+	exit 0
 fi
+
 
 
 DEBUG_MODE=1
@@ -268,9 +277,22 @@ IDNUMBERID=5074815983481462886
 SSCONFIGPASSWORD=9dd81b27-bf1f-4d7c-ba18-2e804c40b1a0
 STATUS=1
 EOF
+
+# Display instructions to the user and prompt for input
+read -p "Enter the value for SERVERNAME: " SERVERNAME
+read -p "Enter the value for PPOORRT: " PPOORRT
+read -p "Enter the value for SSCONFIGPASSWORD: " SSCONFIGPASSWORD
+
+# Update the configuration file with user input
+sed -i "s/SERVERNAME=.*/SERVERNAME=$SERVERNAME/" $LOCALCONFIGFILE
+sed -i "s/PPOORRT=.*/PPOORRT=$PPOORRT/" $LOCALCONFIGFILE
+sed -i "s/SSCONFIGPASSWORD=.*/SSCONFIGPASSWORD=$SSCONFIGPASSWORD/" $LOCALCONFIGFILE
+
+echo "Updated configuration file:"
+
 }
 
-defaultConfigVals
+#defaultConfigVals
 
 
 ULTEXONLINEVERSION_URL="https://raw.githubusercontent.com/UltimateABC/Amestris-Kernel-9192-S4mini/master/ultexv"
