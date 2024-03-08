@@ -1037,13 +1037,12 @@ if [ "$LOCALCONFIGFILESTAT" = "1" ]; then
     echo
 	source "$LOCALCONFIGFILE"
 	green " > NET-CONNECT: CONFIG FILE: [OK]"
-	blue "   >>   - ServerName= HIDDEN #$SERVERNAME"
+	blue "   >>   - ServerName= HIDDEN"
 	blue "   >>   - Password= $SSCONFIGPASSWORD"
 	blue "   >>   - ID NUmber 1= $IDNUMBERXD"
 	blue "   >>   - ID NUmber 2= $IDNUMBERID"
 	blue "   >>   - GRPC Name= $SERVICEGRPCNAME"
 	blue "   >>   - WS Path= $WSPATH"
-	blue "   >>   - PORT= $PPOORRT"
 	echo 
 	replace_variables $SA1_DESTINATION_IRANCELL_WRC
 	replace_variables $SA1_DESTINATION_IRANCELL_GTI
@@ -1099,7 +1098,7 @@ if [ "$LOCAL_VPNSTATUS" != "$sysvpn_status" ]; then
 	fi
 	successMSG "VPN has changed . Reboot ..."
 	sleep 1
-	/hive/sbin/sreboot
+	#/hive/sbin/sreboot
 fi
 
 
