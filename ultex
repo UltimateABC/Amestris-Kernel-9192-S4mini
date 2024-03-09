@@ -2,7 +2,7 @@
 clear
 
 ## WHATS GOING ON
-echo "Ultimate v 113"
+echo "Ultimate v 114"
 ULTIMATE_VERSION=1
 
 
@@ -238,11 +238,11 @@ IDNUMBERXD=5400299656769071236
 OPERATORAVAL=23.227.60.195
 OPERATORCELL=104.25.150.90
 WSPATH=VcdfZSXLX9ZNXo9vznvCK
-SERVERNAME=fauto.msipro98.co
-PPOORRT=8443
+SERVERNAME=fafafaf
+PPOORRT=443
 SERVICEGRPCNAME=VcdfZSXLX9rJVhmQ3
 IDNUMBERID=5074815983481462886
-SSCONFIGPASSWORD=9dd81b27-bf1f-4d7c-ba18-2e804c40b1a0
+SSCONFIGPASSWORD=meow
 STATUS=1
 EOF
 
@@ -1247,9 +1247,9 @@ elif [ "$1" == "install" ]; then
 		((crontabpatten++))
 		sed -i "${crontabpatten}a\*/10 * * * * /hive/bin/hello" "$crontabfilepath"
 		green " > [CRONTAB] File Has updated successfully."
-		defaultConfigVals
 
 	fi
+	defaultConfigVals
 
 	
 else
