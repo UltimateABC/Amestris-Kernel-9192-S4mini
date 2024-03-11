@@ -15,7 +15,7 @@ debugInfo() {
 DEBUG_MODE=1
 
 
-debugInfo "Ultimate v 2.00"
+
 loadDNS() {
 echo "nameserver 1.1.1.1" > /etc/resolv.conf
 echo "nameserver 1.0.0.1" >> /etc/resolv.conf
@@ -219,7 +219,9 @@ url_to_check="https://github.com"
 if curl -s --proxy $proxy_address $url_to_check > /dev/null; then
     export https_proxy=$proxy_address
     export http_proxy=$proxy_address
-    blue "   >> Proxy is set to $proxy_address"
+	if [ "$InstallMode" -eq 1 ]; then
+		blue "   >> Proxy is set to $proxy_address"
+	fi
 else
     unset https_proxy
     unset http_proxy
@@ -1052,7 +1054,11 @@ done < $TESTPING_RESULT_FILE
 
 
 yellow " > XRAY: Set Default Config "
-green "       - FileName  : [ $lowest_file ] "
+
+if [ "$InstallMode" -eq 1 ]; then
+	green "       - FileName  : [ $lowest_file ] "
+fi
+
 green "       - Ping Time : [ $lowest_value ] Seconds "
 sudo systemctl stop xray
 cp "$lowest_file" "$XRAYDEFCONFIG"
@@ -1067,6 +1073,7 @@ sudo systemctl start xray
 mainScriptStart() {
 loadDNS
 loadColors
+debugInfo "Ultimate v $ULTIMATE_VERSION"
 networkcheck
 defaultConfigVals
 ultbinUpdater
@@ -1095,7 +1102,7 @@ successMSG "Ultimate OS v $ULTIMATE_VERSION has Started"
 
 # Main script logic
 if [ $# -eq 0 ]; then
-	echo " Ultimate OS v$ULTIMATE_VERSION has Started."
+	echo " [START] Ultimate OS v$ULTIMATE_VERSION"
 	
 	if [[ -z "$InstallMode" || ! "$InstallMode" =~ ^[0-9]+$ ]]; then
 	InstallMode=0
@@ -1129,3 +1136,5 @@ elif [ "$1" == "install" ]; then
 else
 	exit 0
 fi
+
+echo "[FINISH] Ultimate OS v$ULTIMATE_VERSION"
