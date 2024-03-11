@@ -1061,10 +1061,10 @@ fi
 
 xRaySConfigSelector() {
 for config_file in $(find "$XRAY_CONFIG_DIR" -name '*.json'); do
-    sudo systemctl stop xray
+    systemctl stop xray
     cp "$config_file" "$XRAYDEFCONFIG"
     chmod 777 "$XRAYDEFCONFIG"
-    sudo systemctl start xray
+    systemctl start xray
 	sleep 5
 	xRayStatCheck
 	sleep 1
@@ -1121,13 +1121,13 @@ if [ "$InstallMode" -eq 1 ]; then
 fi
 
 green "       - Ping Time : [ $lowest_value ] Seconds "
-sudo systemctl stop xray
+systemctl stop xray
 cp "$lowest_file" "$XRAYDEFCONFIG"
 echo "$lowest_file" > $SYSTEM_XRAYVPN_LOG
 
 chmod 777 "$XRAYDEFCONFIG"
 sleep 1
-sudo systemctl start xray
+systemctl start xray
 
 }
 
