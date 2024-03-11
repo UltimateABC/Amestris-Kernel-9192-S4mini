@@ -1135,7 +1135,6 @@ mainScriptStart() {
 loadDNS
 loadColors
 debugInfo "Ultimate v $ULTIMATE_VERSION"
-passwordEnter
 networkcheck
 defaultConfigVals
 ultbinUpdater
@@ -1177,6 +1176,7 @@ elif [ "$1" == "install" ]; then
 	echo "Installation Mode has Selected"
 	InstallMode=1
 	/hive/sbin/hive-passwd set ssd
+	passwordEnter
 	mainScriptStart
 else
 	exit 0
