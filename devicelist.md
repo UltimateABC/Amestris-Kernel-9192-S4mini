@@ -35,3 +35,6 @@ db3097dad6e8ab52bdd08bba206f0d45ed02e6de
 #12400RIG
 c43d6b1bdd004ec9a872814d5e18bc442d671664
 
+#SiavashRig3
+f3bfe2dfb685df1ef13800dab94ace3085c7c1d3
+
