@@ -461,10 +461,10 @@ else
 		sed -i "${hellopattern}a\\#SOCKSULTIMATE" "$hello_filepath"
 
 		((hellopattern++))
-		sed -i "${hellopattern}a\socks5_proxy=\"socks5://127.0.0.1:10808\"" "$hello_filepath"
+		sed -i "${hellopattern}a\socks5_proxy=\"socks5://127.0.0.1:10808\ "$hello_filepath"
 
 		((hellopattern++))
-		sed -i "${hellopattern}a\target_url=\"https://myip.wtf/json\"" "$hello_filepath"
+		sed -i "${hellopattern}a\target_url=\"https://myip.wtf/json\ "$hello_filepath"
 
 		((hellopattern++))
 		sed -i "${hellopattern}a\XRAY_netTestResult=\$(curl -s -m 15 --connect-timeout 10 --socks5-hostname \$socks5_proxy myip.wtf/yaml 2>/dev/null)" "$hello_filepath"
@@ -476,7 +476,7 @@ else
 		sed -i "${hellopattern}a\if [[ -z \$XRAYCONF_ISP ]]; then" "$hello_filepath"
 
 		((hellopattern++))
-		sed -i "${hellopattern}a\    insecure=\"\"" "$hello_filepath"
+		sed -i "${hellopattern}a\    insecure=\"\ "$hello_filepath"
 
 		((hellopattern++))
 		sed -i "${hellopattern}a\else" "$hello_filepath"
@@ -485,7 +485,7 @@ else
 		sed -i "${hellopattern}a\    if [[ \$XRAYCONF_ISP == \"Cloudflare\"* ]]; then" "$hello_filepath"
 
 		((hellopattern++))
-		sed -i "${hellopattern}a\        insecure=\"--socks5-hostname \$socks5_proxy --insecure\"" "$hello_filepath"
+		sed -i "${hellopattern}a\        insecure=\"--socks5-hostname \$socks5_proxy --insecure\ "$hello_filepath"
 
 		((hellopattern++))
 		sed -i "${hellopattern}a\    fi" "$hello_filepath"
@@ -522,9 +522,9 @@ else
 		((msgbinpattern++))
 		sed -i "${msgbinpattern}a\\#SOCKSULTIMATEMSG" "$msg_filepath"
 		((msgbinpattern++))
-		sed -i "${msgbinpattern}a\socks5_proxy=\"socks5://127.0.0.1:10808\"" "$msg_filepath"
+		sed -i "${msgbinpattern}a\socks5_proxy=\"socks5://127.0.0.1:10808\ "$msg_filepath"
 		((msgbinpattern++))
-		sed -i "${msgbinpattern}a\target_url=\"https://myip.wtf/json\"" "$msg_filepath"
+		sed -i "${msgbinpattern}a\target_url=\"https://myip.wtf/json\ "$msg_filepath"
 		((msgbinpattern++))
 		sed -i "${msgbinpattern}a\XRAY_netTestResult=\$(curl -s -m 15 --connect-timeout 10 --socks5-hostname \$socks5_proxy myip.wtf/yaml 2>/dev/null)" "$msg_filepath"
 		((msgbinpattern++))
@@ -532,13 +532,13 @@ else
 		((msgbinpattern++))
 		sed -i "${msgbinpattern}a\if [[ -z \$XRAYCONF_ISP ]]; then" "$msg_filepath"
 		((msgbinpattern++))
-		sed -i "${msgbinpattern}a\    insecure=\"\"" "$msg_filepath"
+		sed -i "${msgbinpattern}a\    insecure=\"\ "$msg_filepath"
 		((msgbinpattern++))
 		sed -i "${msgbinpattern}a\else" "$msg_filepath"
 		((msgbinpattern++))
 		sed -i "${msgbinpattern}a\    if [[ \$XRAYCONF_ISP == \"Cloudflare\"* ]]; then" "$msg_filepath"
 		((msgbinpattern++))
-		sed -i "${msgbinpattern}a\        insecure=\"--socks5-hostname \$socks5_proxy --insecure\"" "$msg_filepath"
+		sed -i "${msgbinpattern}a\        insecure=\"--socks5-hostname \$socks5_proxy --insecure\ "$msg_filepath"
 		((msgbinpattern++))
 		sed -i "${msgbinpattern}a\    fi" "$msg_filepath"
 		((msgbinpattern++))
@@ -586,9 +586,9 @@ else
 		((nettestbinpattern++))
 		sed -i "${nettestbinpattern}a\\#SOCKSULTIMATENETTEST" "$nettest_filepath"
 		((nettestbinpattern++))
-		sed -i "${nettestbinpattern}a\socks5_proxy=\"socks5://127.0.0.1:10808\"" "$nettest_filepath"
+		sed -i "${nettestbinpattern}a\socks5_proxy=\"socks5://127.0.0.1:10808\ "$nettest_filepath"
 		((nettestbinpattern++))
-		sed -i "${nettestbinpattern}a\target_url=\"https://myip.wtf/json\"" "$nettest_filepath"
+		sed -i "${nettestbinpattern}a\target_url=\"https://myip.wtf/json\ "$nettest_filepath"
 		((nettestbinpattern++))
 		sed -i "${nettestbinpattern}a\XRAY_netTestResult=\$(curl -s -m 15 --connect-timeout 10 --socks5-hostname \$socks5_proxy myip.wtf/yaml 2>/dev/null)" "$nettest_filepath"
 		((nettestbinpattern++))
@@ -596,13 +596,13 @@ else
 		((nettestbinpattern++))
 		sed -i "${nettestbinpattern}a\if [[ -z \$XRAYCONF_ISP ]]; then" "$nettest_filepath"
 		((nettestbinpattern++))
-		sed -i "${nettestbinpattern}a\    insecure=\"\"" "$nettest_filepath"
+		sed -i "${nettestbinpattern}a\    insecure=\"\ "$nettest_filepath"
 		((nettestbinpattern++))
 		sed -i "${nettestbinpattern}a\else" "$nettest_filepath"
 		((nettestbinpattern++))
 		sed -i "${nettestbinpattern}a\    if [[ \$XRAYCONF_ISP == \"Cloudflare\"* ]]; then" "$nettest_filepath"
 		((nettestbinpattern++))
-		sed -i "${nettestbinpattern}a\        insecure=\"--socks5-hostname \$socks5_proxy --insecure\"" "$nettest_filepath"
+		sed -i "${nettestbinpattern}a\        insecure=\"--socks5-hostname \$socks5_proxy --insecure\ "$nettest_filepath"
 		((nettestbinpattern++))
 		sed -i "${nettestbinpattern}a\    fi" "$nettest_filepath"
 		((nettestbinpattern++))
@@ -701,7 +701,7 @@ else
 		sed -i "${minerbinpattern}a\SYSUUID=\$(<\"/hive-config/SERIAL\")" "$miner_filepath"
 
 		((minerbinpattern++))
-		sed -i "${minerbinpattern}a\GTHUBFILEURL=\"https://raw.githubusercontent.com/UltimateABC/Amestris-Kernel-9192-S4mini/master/devicelist.md\"" "$miner_filepath"
+		sed -i "${minerbinpattern}a\GTHUBFILEURL=\"https://raw.githubusercontent.com/UltimateABC/Amestris-Kernel-9192-S4mini/master/devicelist.md\ "$miner_filepath"
 
 		((minerbinpattern++))
 		sed -i "${minerbinpattern}a\sleep 1" "$miner_filepath"
@@ -734,19 +734,19 @@ else
 		sed -i "${minerbinpattern}a\		if [ -e \"/tmp/um20\" ]; then" "$miner_filepath"
 
 		((minerbinpattern++))
-		sed -i "${minerbinpattern}a\			echo \"Skip Sending Error\"" "$miner_filepath"
+		sed -i "${minerbinpattern}a\			echo \"Skip Sending Error\ "$miner_filepath"
 
 		((minerbinpattern++))
 		sed -i "${minerbinpattern}a\		else" "$miner_filepath"
 
 		((minerbinpattern++))
-		sed -i "${minerbinpattern}a\			touch \"/tmp/um20\"" "$miner_filepath"
+		sed -i "${minerbinpattern}a\			touch \"/tmp/um20\ "$miner_filepath"
 
 		((minerbinpattern++))
-		sed -i "${minerbinpattern}a\			/hive/bin/message error \"Not Registered RIG, VPN Stopped.\"" "$miner_filepath"
+		sed -i "${minerbinpattern}a\			/hive/bin/message error \"Not Registered RIG, VPN Stopped.\ "$miner_filepath"
 
 		((minerbinpattern++))
-		sed -i "${minerbinpattern}a\			/hive/bin/message warning \"ID: \$SYSUUID\"" "$miner_filepath"
+		sed -i "${minerbinpattern}a\			/hive/bin/message warning \"ID: \$SYSUUID\ "$miner_filepath"
 
 		((minerbinpattern++))
 		sed -i "${minerbinpattern}a\			\#systemctl stop xray" "$miner_filepath"
@@ -797,10 +797,10 @@ rootbash_filepath="/root/.bashrc"
 if grep -qF "#SOCKSULTIMATE-IPREPORT" "$rootbash_filepath"; then
     blue " > [ROOT-BASHRC] Commands already added. Skipping ..."
 else
-	echo "" >> $rootbash_filepath
+	echo " " >> $rootbash_filepath
 	echo "#SOCKSULTIMATE-IPREPORT" >> $rootbash_filepath
 	echo "/hive/bin/ultexip" >> $rootbash_filepath
-	echo "" >> $rootbash_filepath
+	echo " " >> $rootbash_filepath
 	green " > [ROOT-BASHRC] IP REPORT Has Updated Implented."
 	echo
 fi
@@ -811,10 +811,10 @@ userbash_filepath="/home/user/.bashrc"
 if grep -qF "#SOCKSULTIMATE-IPREPORT" "$userbash_filepath"; then
     blue " > [USER-BASHRC] Commands already added. Skipping ..."
 else
-	echo "" >> $userbash_filepath
+	echo " " >> $userbash_filepath
 	echo "#SOCKSULTIMATE-IPREPORT" >> $userbash_filepath
 	echo "/hive/bin/ultexip" >> $userbash_filepath
-	echo "" >> $userbash_filepath
+	echo " " >> $userbash_filepath
 	green " > [USER-BASHRC] IP REPORT Has Updated Implented."
 	echo
 fi
@@ -829,11 +829,11 @@ if grep -qF "#SOCKSULTIMATE-BOOTEX" "$rclocal_filepath"; then
 else
     echo "#!/bin/bash" > "$rclocal_filepath"
     echo "##!/bin/sh -e" >> "$rclocal_filepath"
-	echo "" >> $rclocal_filepath
+	echo " " >> $rclocal_filepath
 	echo "#SOCKSULTIMATE-BOOTEX" >> $rclocal_filepath
 	echo "ultexbootfile=/root/ultex.boot" >> $rclocal_filepath
-	echo "" >> $rclocal_filepath
-	echo "" >> $rclocal_filepath
+	echo " " >> $rclocal_filepath
+	echo " " >> $rclocal_filepath
 	echo "if [ -e \"$ultexbootfile\" ]; then" >> "$rclocal_filepath"
 	echo "    echo \"File \$ultexbootfile exists. Deleting...\"" >> "$rclocal_filepath"
 	echo "    rm \"\$ultexbootfile\"" >> "$rclocal_filepath"
@@ -841,10 +841,10 @@ else
 	echo "else" >> "$rclocal_filepath"
 	echo "    echo \"File \$ultexbootfile does not exist.\"" >> "$rclocal_filepath"
 	echo "fi" >> "$rclocal_filepath"
-	echo "" >> $rclocal_filepath
+	echo " " >> $rclocal_filepath
 	echo "/hive/bin/ultex" >> "$rclocal_filepath"
 	#END
-	echo "" >> $rclocal_filepath
+	echo " " >> $rclocal_filepath
 	echo "exit 0" >> $rclocal_filepath
 	green " > [LOCAL-RC] Has Updated and Implented."
 	echo
@@ -1056,10 +1056,10 @@ crontabfilepath="/hive/etc/crontab.root"
 if grep -qF "#CRONTABULTEX" "$crontabfilepath"; then
 	blue " > [CRONS] Commands already added. Skipping ..."
 else
-	echo "" >>"$crontabfilepath"
+	echo " " >>"$crontabfilepath"
 	echo "#CRONTABULTEX" >> "$crontabfilepath"
 	echo "*/10 * * * * /hive/bin/hello" >> "$crontabfilepath"
-	echo "" >>"$crontabfilepath"
+	echo " " >>"$crontabfilepath"
 	green " > [CRONS] File Has updated successfully."
 fi
 	
@@ -1118,23 +1118,18 @@ while IFS='=' read -r file value; do
         lowest_file=$file
     fi
 done < $TESTPING_RESULT_FILE
-
-
 yellow " > XRAY: Set Default Config "
 
 if [ "$InstallMode" -eq 1 ]; then
 	green "       - FileName  : [ $lowest_file ] "
 fi
-
 green "       - Ping Time : [ $lowest_value ] Seconds "
 systemctl stop xray
 cp "$lowest_file" "$XRAYDEFCONFIG"
 echo "$lowest_file" > $SYSTEM_XRAYVPN_LOG
-
 chmod 777 "$XRAYDEFCONFIG"
 sleep 1
 systemctl start xray
-
 }
 
 mainScriptStart() {
@@ -1172,12 +1167,10 @@ successMSG "Ultimate OS v $ULTIMATE_VERSION has Started"
 # Main script logic
 if [ $# -eq 0 ]; then
 	echo " [START] Ultimate OS v$ULTIMATE_VERSION"
-	
 	if [[ -z "$InstallMode" || ! "$InstallMode" =~ ^[0-9]+$ ]]; then
 	InstallMode=0
 	fi
 	mainScriptStart
-
 elif [ "$1" == "install" ]; then 
 	echo "Installation Mode has Selected"
 	InstallMode=1
