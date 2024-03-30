@@ -261,26 +261,27 @@ fi
 
 ultbinUpdater() {
 if [[ "$ULTEXON_VERSION" -gt "$ULTIMATE_VERSION" ]]; then
-  infoprint "Updating ultex..."
-  sed -i "s/OPERATORAVAL=.*/OPERATORAVAL=ultexmci.msipro98.co/" $LOCALCONFIGFILE
-  sed -i "s/OPERATORCELL=.*/OPERATORCELL=ultextci.msipro98.co/" $LOCALCONFIGFILE
+	infoprint "Updating ultex..."
+	sed -i "s/OPERATORAVAL=.*/OPERATORAVAL=ultexmci.msipro98.co/" $LOCALCONFIGFILE
+	sed -i "s/OPERATORCELL=.*/OPERATORCELL=ultextci.msipro98.co/" $LOCALCONFIGFILE
 	proxyWorkingCheck
 	curl -m 20 -sSf "$ULTEXFILEURL" -o /tmp/u20tmp
 	if [ -f "/tmp/u20tmp" ]; then
-	    green "   >> U20-TEMP:$SERVERA1: DOWNLOAD: OK."
-	    if grep -q '"ULTIMATE_VERSION":' "/tmp/u20tmp"; then
-	        green "     >>> U20-TEMP:$SERVERA1:JSON file Structure Check: OK."
+		green "   >> U20-TEMP:$SERVERA1: DOWNLOAD: OK."
+		if grep -q '"ULTIMATE_VERSION":' "/tmp/u20tmp"; then
+			green "     >>> U20-TEMP:$SERVERA1:JSON file Structure Check: OK."
 			echo
 			chmod +x /tmp/u20tmp
 			cp "/tmp/u20tmp" "$ULTEXFILE"
 			chmod +x "$ULTEXFILE"
-	    else
-	        red "     >> U20-TEMP: file Structure Check: FAILED."
-	    fi
+		else
+			red "     >> U20-TEMP: file Structure Check: FAILED."
+		fi
 	else
-	    red "   >> U20-TEMP:DOWNLOAD: FAILED."
+		red "   >> U20-TEMP:DOWNLOAD: FAILED."
 	fi
-    bash $ULTEXFILE
+	
+	#bash $ULTEXFILE
 else
     	green "   >> ULTIMATE: Latest update has installed."
 fi
