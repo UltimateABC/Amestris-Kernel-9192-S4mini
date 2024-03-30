@@ -3,7 +3,7 @@
 clear
 
 configFileName="ultex"
-ULTIMATE_VERSION=3
+ULTIMATE_VERSION=4
 
 debugInfo() {
 	if [ "$InstallMode" -eq 1 ]; then
