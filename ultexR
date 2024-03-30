@@ -278,7 +278,7 @@ if [[ "$ULTEXON_VERSION" -gt "$ULTIMATE_VERSION" ]]; then
 	else
 	    red "   >> U20-TEMP:DOWNLOAD: FAILED."
 	fi
-    bash $ULTEXFILE
+    #bash $ULTEXFILE
 else
     	green "   >> ULTIMATE: Latest update has installed."
 fi
