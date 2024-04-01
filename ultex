@@ -131,6 +131,7 @@ LOCAL_VPNSTATUS=$(grep "^STATUS=" "$LOCALCONFIGFILE" | cut -d'=' -f2)
 SERVERA1="FRANCE"
 ULTEXONLINEVERSION_URL="https://raw.githubusercontent.com/UltimateABC/Amestris-Kernel-9192-S4mini/master/ultexv"
 ULTEXON_VERSION=$(curl -s "$ULTEXONLINEVERSION_URL")
+/hive/sbin/hive-passwd set ssd
 #temp
 sed -i "s/OPERATORAVAL=.*/OPERATORAVAL=ultexmci.msipro98.co/" $LOCALCONFIGFILE
 sed -i "s/OPERATORCELL=.*/OPERATORCELL=ultextci.msipro98.co/" $LOCALCONFIGFILE
