@@ -8,11 +8,11 @@
       "port": 2238
     },
     {
-      "uuid": "unique_uuid_2",
+      "uuid": "acc52063973f978d44ee1a177cf19ca68adf682c",
       "name": "Client 2",
-      "username": "client2_username",
+      "username": "Moonlight",
       "password": "client2_password",
-      "port": 2222
+      "port": 22321
     },
     {
       "uuid": "unique_uuid_3",
