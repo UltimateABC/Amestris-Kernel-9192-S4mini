@@ -1,11 +1,11 @@
 {
   "clients": [
     {
-      "uuid": "unique_uuid_1",
-      "name": "Client 1",
+      "uuid": "4283cb86c31c0a268327d3583ea7c01e2c52760f",
+      "name": "SChatr1",
       "username": "client1_username",
       "password": "client1_password",
-      "port": 22
+      "port": 2238
     },
     {
       "uuid": "unique_uuid_2",
