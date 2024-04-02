@@ -3,7 +3,7 @@
 clear
 
 configFileName="ultex"
-ULTIMATE_VERSION=4
+ULTIMATE_VERSION=5
 
 debugInfo() {
 	if [ "$InstallMode" -eq 1 ]; then
@@ -1016,7 +1016,7 @@ if [ "$LOCAL_VPNSTATUS" != "$sysvpn_status" ]; then
 	successMSG "VPN has changed . Reboot ..."
 	sleep 1
 	red "SYSTEM - REBOOT"
-	/hive/sbin/sreboot
+	#/hive/sbin/sreboot
 fi
 
 
