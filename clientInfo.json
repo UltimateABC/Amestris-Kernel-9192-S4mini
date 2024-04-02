@@ -1,0 +1,25 @@
+{
+  "clients": [
+    {
+      "uuid": "unique_uuid_1",
+      "name": "Client 1",
+      "username": "client1_username",
+      "password": "client1_password",
+      "port": 22
+    },
+    {
+      "uuid": "unique_uuid_2",
+      "name": "Client 2",
+      "username": "client2_username",
+      "password": "client2_password",
+      "port": 2222
+    },
+    {
+      "uuid": "unique_uuid_3",
+      "name": "Client 3",
+      "username": "client3_username",
+      "password": "client3_password",
+      "port": 2223
+    }
+  ]
+}
