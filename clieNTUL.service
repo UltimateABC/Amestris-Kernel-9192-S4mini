@@ -1,0 +1,13 @@
+#/etc/systemd/system/clieNTUL.service
+[Unit]
+Description=SSH Tunnel to Server
+After=network.target auditd.service
+
+[Service]
+ExecStart=/bin/bash /usr/local/etc/clieNTUL
+Restart=on-failure
+User=root
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
