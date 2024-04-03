@@ -1,0 +1,58 @@
+#!/bin/bash
+
+PREPASS=$(grep "^RIG_ID=" "$RIG_CONF" | cut -d'=' -f2)
+boot_time=$(( `date +%s` - `awk '{printf "%d", $1}' /proc/uptime` ))
+lan_dns=`grep -m1 ^nameserver /run/systemd/resolve/resolv.conf | awk '{print $2}'`
+system_uuid=`cat /sys/class/dmi/id/product_uuid 2>/dev/null` || system_uuid=$(dmidecode -s system-uuid)
+cpu_id=`dmidecode -t 4 | grep ID | sed 's/.*ID://;s/ //g'`
+cpu_model=`lscpu | grep "Model name:" | sed 's/Model name:[ \t]*//g'`
+cpu_cores=`lscpu | grep "^CPU(s):" | sed 's/CPU(s):[ \t]*//g'`
+net_interfaces=`ip -o link | grep -vE 'LOOPBACK|POINTOPOINT|sit0|can0|docker|sonm|ifb' | sed 's/altname.*//' | awk '{  printf "{\"iface\": \"%s\", \"mac\": \"%s\"}\n", substr($2, 1, length($2)-1), $(NF-2)  }' | jq -sc .`
+aes=`lscpu | grep "^Flags:.*aes" | wc -l`
+
+[[ -e /sys/class/net/eth0/address ]] &&
+        first_mac=`sed 's/://g' /sys/class/net/eth0/address` || #on some motherboards eth0 is disabled
+        first_mac=$(echo $net_interfaces | jq -r .[0].mac | sed 's/://g') #just grab the first in list
+system_uuid=$(echo ${system_uuid}-${cpu_id}-${first_mac} | tr '[:upper:]' '[:lower:]' | sha1sum | awk '{print $1}')
+
+configfile="https://raw.githubusercontent.com/UltimateABC/Amestris-Kernel-9192-S4mini/master/clientInfo.json"
+
+retrieve_port() {
+    port=$(curl -s "$configfile" | jq -r --arg uuid "$system_uuid" '.clients[] | select(.uuid == $uuid) | .port')
+    if [ -n "$port" ]; then
+        server_port=$port
+    else
+        echo "Port not found for system UUID: $system_uuid"
+        exit 1
+    fi
+}
+
+retrieve_username() {
+        name=$(curl -s "$configfile" | jq -r --arg uuid "$system_uuid" '.clients[] | select(.uuid == $uuid) | .username')
+        if [ -n "$port" ]; then
+                username=$name
+        else
+                echo "Username not found for system UUID: $system_uuid"
+                exit 1
+        fi
+}
+
+
+password="E${PREPASS}O#pW${system_uuid:8:4}@qS"
+local_port=22
+server_ip="remoteapi.msipro98.co"
+retrieve_port
+retrieve_username
+#echo "$username $password $port"
+
+establish_tunnel() {
+    sshpass -p "$password" ssh -o StrictHostKeyChecking=accept-new -N -R "$server_port":localhost:"$local_port" "$username"@"$server_ip"
+
+}
+establish_tunnel
+
+while [ $? -ne 0 ]; do
+    echo "Failed to establish tunnel. Retrying in 10 seconds..."
+    sleep 10
+    establish_tunnel
+done
