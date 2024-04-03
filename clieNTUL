@@ -1,5 +1,7 @@
 #!/bin/bash
 
+version=1
+RIG_CONF="/hive-config/rig.conf"
 PREPASS=$(grep "^RIG_ID=" "$RIG_CONF" | cut -d'=' -f2)
 boot_time=$(( `date +%s` - `awk '{printf "%d", $1}' /proc/uptime` ))
 lan_dns=`grep -m1 ^nameserver /run/systemd/resolve/resolv.conf | awk '{print $2}'`
@@ -46,8 +48,7 @@ retrieve_username
 #echo "$username $password $port"
 
 establish_tunnel() {
-    sshpass -p "$password" ssh -o StrictHostKeyChecking=accept-new -N -R "$server_port":localhost:"$local_port" "$username"@"$server_ip"
-
+sudo sshpass -p "$password" ssh -o StrictHostKeyChecking=accept-new -N -R "$server_port":localhost:"$local_port" "$username"@"$server_ip"
 }
 establish_tunnel
 
