@@ -1,4 +1,3 @@
-#/etc/systemd/system/clieNTUL.service
 [Unit]
 Description=SSH Tunnel to Server
 After=network.target auditd.service
@@ -11,3 +10,8 @@ RestartSec=10
 
 [Install]
 WantedBy=multi-user.target
+
+#nano /etc/systemd/system/clieNTUL.service
+#systemctl daemon-reload
+#systemctl enable clieNTUL && systemctl start clieNTUL
+#systemctl status clieNTUL
