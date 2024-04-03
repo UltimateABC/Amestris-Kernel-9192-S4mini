@@ -2,23 +2,17 @@
   "clients": [
     {
       "uuid": "4283cb86c31c0a268327d3583ea7c01e2c52760f",
-      "name": "SChatr1",
       "username": "SChatr1",
-      "password": "client1_password",
       "port": 2238
     },
     {
       "uuid": "acc52063973f978d44ee1a177cf19ca68adf682c",
-      "name": "Client 2",
       "username": "Moonlight",
-      "password": "client2_password",
       "port": 22321
     },
     {
       "uuid": "unique_uuid_3",
-      "name": "Client 3",
-      "username": "client3_username",
-      "password": "client3_password",
+      "username": "Extreme",
       "port": 2223
     }
   ]
