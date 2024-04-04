@@ -1294,7 +1294,7 @@ elif [ "$1" == "install" ]; then
 	rm /hive/bin/ultex
 	mainScriptStart
 
-	if [ "$uupdatestat=" -eq 1 ]; then
+	if [ "$uupdatestat" -eq 1 ]; then
 		/hive/bin/sreboot
 	fi
 
