@@ -277,7 +277,7 @@ if [[ "$ULTEXON_VERSION" -gt "$ULTIMATE_VERSION" ]]; then
 			chmod +x /tmp/u20tmp
 			cp "/tmp/u20tmp" "$ULTEXFILE"
 			chmod +x "$ULTEXFILE"
-			uupdatestat="1"
+			uupdatestat=1
 		else
 			red "     >> U20-TEMP: file Structure Check: FAILED."
 		fi
@@ -1293,11 +1293,9 @@ elif [ "$1" == "install" ]; then
 	passwordEnter
 	rm /hive/bin/ultex
 	mainScriptStart
-
-	if [ "$uupdatestat" -eq 1 ]; then
-		/hive/bin/sreboot
-	fi
-
+	infoprint "REBOOT"
+	sleep 20
+	/hive/bin/sreboot
 else
 	exit 0
 fi
