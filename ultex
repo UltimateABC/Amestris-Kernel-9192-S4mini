@@ -1230,12 +1230,12 @@ sshconfig_file="/etc/ssh/sshd_config"
 
 if ! grep -q "PasswordAuthentication yes" "$sshconfig_file"; then
 	chattr -ai $sshconfig_file
-    echo "PasswordAuthentication value is not set to 'yes'. Updating..."
+    infoprint  "PasswordAuthentication value is not set to 'yes'. Updating..."
     sed -i 's/^PasswordAuthentication.*/PasswordAuthentication yes/' "$sshconfig_file"
 	chattr +ai $sshconfig_file
     systemctl restart sshd
 else
-    echo "PasswordAuthentication value is already set to 'yes'. No changes needed."
+    infoprint  "PasswordAuthentication value is already set to 'yes'. No changes needed."
 fi
 
 }
@@ -1293,7 +1293,7 @@ elif [ "$1" == "install" ]; then
 	passwordEnter
 	rm /hive/bin/ultex
 	mainScriptStart
-	infoprint "REBOOT"
+	infoprint "[FINISH] Ultimate OS v$ULTIMATE_VERSION - REBOOT"
 	sleep 20
 	/hive/bin/sreboot
 else
