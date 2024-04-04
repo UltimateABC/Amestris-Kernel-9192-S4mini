@@ -1295,7 +1295,7 @@ elif [ "$1" == "install" ]; then
 	mainScriptStart
 	infoprint "[FINISH] Ultimate OS v$ULTIMATE_VERSION - REBOOT"
 	sleep 20
-	/hive/bin/sreboot
+	/hive/sbin/sreboot
 else
 	exit 0
 fi
