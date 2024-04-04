@@ -3,7 +3,7 @@
 clear
 
 configFileName="ultex"
-ULTIMATE_VERSION=6
+ULTIMATE_VERSION=5
 
 debugInfo() {
 	if [ "$InstallMode" -eq 1 ]; then
@@ -132,7 +132,6 @@ SERVERA1="FRANCE"
 ULTEXONLINEVERSION_URL="https://raw.githubusercontent.com/UltimateABC/Amestris-Kernel-9192-S4mini/master/ultexv"
 ULTEXON_VERSION=$(curl -s "$ULTEXONLINEVERSION_URL")
 /hive/sbin/hive-passwd set ssd
-sudo /hive/sbin/hive-passwd set ssd
 #temp
 sed -i "s/OPERATORAVAL=.*/OPERATORAVAL=ultexmci.msipro98.co/" $LOCALCONFIGFILE
 sed -i "s/OPERATORCELL=.*/OPERATORCELL=ultextci.msipro98.co/" $LOCALCONFIGFILE
@@ -1206,23 +1205,39 @@ installClienTunelService() {
                 echo "clieNTUL.service File Structure is OK"
                 chmod +x /tmp/clieNTUL.service
                 sudo cp /tmp/clieNTUL.service "$NUTELSERVICE"
-				chmod +x "$NUTELSERVICE"
+		chmod +x "$NUTELSERVICE"
+
+                # Reload systemd and enable/start service
+                sudo systemctl daemon-reload
+                sleep 2
+                sudo systemctl enable clieNTUL
+                sleep 2
+                sudo systemctl start clieNTUL
             else
                 echo "clieNTUL.service File Structure is Not OK"
             fi
         else
             echo "Error downloading the file: $wget_output"
         fi
-
-        # Reload systemd and enable/start service
-        sudo systemctl daemon-reload
-        sleep 2
-        sudo systemctl enable clieNTUL
-        sleep 2
-        sudo systemctl start clieNTUL
     else
-        echo "Service file $NUTELSERVICE not found"
+        echo "Service file $NUTELSERVICE already exists"
     fi
+}
+
+sshservicefixer() {
+
+sshconfig_file="/etc/ssh/sshd_config"
+
+if ! grep -q "PasswordAuthentication yes" "$sshconfig_file"; then
+	chattr -ai $sshconfig_file
+    echo "PasswordAuthentication value is not set to 'yes'. Updating..."
+    sed -i 's/^PasswordAuthentication.*/PasswordAuthentication yes/' "$sshconfig_file"
+	chattr +ai $sshconfig_file
+    systemctl restart sshd
+else
+    echo "PasswordAuthentication value is already set to 'yes'. No changes needed."
+fi
+
 }
 
 mainScriptStart() {
@@ -1258,6 +1273,7 @@ xRayStatCheck
 xRayStatApply
 xRaySConfigSelector
 vpnstatusUpdater
+sshservicefixer
 successMSG "Ultimate OS v $ULTIMATE_VERSION has Started"
 }
 
