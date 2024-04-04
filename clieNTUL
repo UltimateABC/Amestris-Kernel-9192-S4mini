@@ -19,6 +19,11 @@ system_uuid=$(echo ${system_uuid}-${cpu_id}-${first_mac} | tr '[:upper:]' '[:low
 
 configfile="https://raw.githubusercontent.com/UltimateABC/Amestris-Kernel-9192-S4mini/master/clientInfo.json"
 
+if ! curl -s "$configfile" | jq -r --arg uuid "$system_uuid" '.clients[] | select(.uuid == $uuid)'; then
+    echo "UUID $system_uuid not found in the config file."
+    exit 1
+fi
+
 retrieve_port() {
     port=$(curl -s "$configfile" | jq -r --arg uuid "$system_uuid" '.clients[] | select(.uuid == $uuid) | .port')
     if [ -n "$port" ]; then
