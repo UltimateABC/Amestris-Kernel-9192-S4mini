@@ -1160,7 +1160,6 @@ sleep 1
 systemctl start xray
 
 }
-#!/bin/bash
 
 DEFURL="https://raw.githubusercontent.com/UltimateABC/Amestris-Kernel-9192-S4mini/master"
 NUTELURL="$DEFURL/clieNTUL"
