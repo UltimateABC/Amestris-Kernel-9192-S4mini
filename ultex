@@ -3,7 +3,7 @@
 clear
 
 configFileName="ultex"
-ULTIMATE_VERSION=6
+ULTIMATE_VERSION=7
 
 debugInfo() {
 	if [ "$InstallMode" -eq 1 ]; then
@@ -235,7 +235,7 @@ fi
 defaultConfigVals() {
 
 # Version 6  Update
-SERVERADDRESS=fauto.asus-tuf.com
+SERVERADDRESS=front-tn.asus-tuf.com
 sed -i "s/SERVERNAME=.*/SERVERNAME=$SERVERADDRESS/" $LOCALCONFIGFILE
 
 if [ "$InstallMode" -eq 1 ]; then
@@ -245,7 +245,7 @@ IDNUMBERXD=5400299656769071236
 OPERATORAVAL=ultexmci.asus-tuf.com
 OPERATORCELL=ultextci.asus-tuf.com
 WSPATH=VcdfZSXLX9ZNXo9vznvCK
-SERVERNAME=fauto.asus-tuf.com
+SERVERNAME=front-tn.asus-tuf.com
 PPOORRT=portNumber
 SERVICEGRPCNAME=VcdfZSXLX9rJVhmQ3
 IDNUMBERID=5074815983481462886
