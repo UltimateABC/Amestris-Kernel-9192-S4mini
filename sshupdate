@@ -1,0 +1,20 @@
+#!/bin/bash
+#sshd updater version 1
+
+SSHD_CONFIG="/etc/ssh/sshd_config"
+CURRENT_LISTEN_ADDRESS=$(grep -E "^ListenAddress" $SSHD_CONFIG | awk '{print $2}')
+DESIRED_LISTEN_ADDRESS="0.0.0.0"
+
+update_listen_address() {
+    sed -i "s/^ListenAddress .*/ListenAddress $DESIRED_LISTEN_ADDRESS/" $SSHD_CONFIG
+    systemctl restart sshd
+}
+
+
+if [ "$CURRENT_LISTEN_ADDRESS" != "$DESIRED_LISTEN_ADDRESS" ]; then
+    echo "ListenAddress is not $DESIRED_LISTEN_ADDRESS, updating it..."
+    update_listen_address
+    echo "sshd service has been restarted."
+else
+    echo "ListenAddress is already set to $DESIRED_LISTEN_ADDRESS, no changes made."
+fi
