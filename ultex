@@ -1090,6 +1090,13 @@ fi
 }
 
 xRaySConfigSelector() {
+
+if [ -f "$TESTPING_RESULT_FILE" ]; then
+	> "$TESTPING_RESULT_FILE"
+else
+	touch "$TESTPING_RESULT_FILE"
+fi
+
 for config_file in $(find "$XRAY_CONFIG_DIR" -name '*.json'); do
     systemctl stop xray
     cp "$config_file" "$XRAYDEFCONFIG"
@@ -1334,5 +1341,3 @@ fi
 
 
 echo "[FINISH] Ultimate OS v$ULTIMATE_VERSION"
-
-#test9.1
