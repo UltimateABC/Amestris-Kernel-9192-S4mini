@@ -1272,6 +1272,7 @@ if [ -f "$NUTELSERVICE" ]; then
 	echo "Stop and disabling the service..."
 	systemctl stop clieNTUL.service
 	systemctl disable clieNTUL.service
+	rm "$NUTELSERVICE"
 fi
 
 }
