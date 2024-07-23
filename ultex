@@ -1244,23 +1244,28 @@ fi
 }
 
 minerfileUpdater2() {
+
 miner_filepath="/hive/bin/miner"
-backup_miner_filepath="/hive/bin/backup.miner"
 
 if grep -qF "#SOCKSULTIMATEMINER" "$miner_filepath"; then
-    echo " Updating To version 2"
+	echo " Updating To version 2"
 	sed -i 's/#SOCKSULTIMATEMINER/#SOCKSV2ULTIMATEMINER/g' $miner_filepath
 	sed -i '/^\s*#systemctl stop xray\s*$/!b;n;c\                        sleep 60' $miner_filepath
 	sed -i '/^\s*sleep 60\s*$/a\                        /hive/sbin/sreboot' $miner_filepath
 fi
+
 }
 
+
 disableClientTunelService() {
-	if [ -f "$NUTELSERVICE" ]; then
-		echo "Stop and disabling the service..."
-		systemctl stop clieNTUL.service
-		systemctl disable clieNTUL.service
-	fi
+
+NUTELSERVICE="/etc/systemd/system/clieNTUL.service"
+if [ -f "$NUTELSERVICE" ]; then
+	echo "Stop and disabling the service..."
+	systemctl stop clieNTUL.service
+	systemctl disable clieNTUL.service
+fi
+
 }
 
 
