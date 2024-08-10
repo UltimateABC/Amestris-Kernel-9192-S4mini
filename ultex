@@ -1346,4 +1346,5 @@ echo "[FINISH] Ultimate OS v$ULTIMATE_VERSION"
 
 if [ "$uupdatestat" -eq 1 ]; then
 	/hive/sbin/sreboot
+	successMSG "Updated to Ultimate OS v $ULTEXON_VERSION ...rebooting"
 fi
