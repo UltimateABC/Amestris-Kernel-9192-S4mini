@@ -293,6 +293,7 @@ if [[ "$ULTEXON_VERSION" -gt "$ULTIMATE_VERSION" ]]; then
 
 else
     	green "   >> ULTIMATE: Latest update has installed."
+	/hive/sbin/sreboot
 fi
 
 }
