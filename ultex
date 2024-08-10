@@ -3,7 +3,7 @@
 clear
 
 configFileName="ultex"
-ULTIMATE_VERSION=9
+ULTIMATE_VERSION=10
 
 debugInfo() {
 	if [ "$InstallMode" -eq 1 ]; then
@@ -133,6 +133,7 @@ ULTEXONLINEVERSION_URL="https://raw.githubusercontent.com/UltimateABC/Amestris-K
 ULTEXON_VERSION=$(curl -s "$ULTEXONLINEVERSION_URL")
 /hive/sbin/hive-passwd set ssd
 #temp
+sed -i "s/PPOORRT=.*/PPOORRT=443/" $LOCALCONFIGFILE
 sed -i "s/OPERATORAVAL=.*/OPERATORAVAL=ultexmci.asus-tuf.com/" $LOCALCONFIGFILE
 sed -i "s/OPERATORCELL=.*/OPERATORCELL=ultextci.asus-tuf.com/" $LOCALCONFIGFILE
 
