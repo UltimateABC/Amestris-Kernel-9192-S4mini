@@ -5,6 +5,10 @@ clear
 configFileName="ultexv2"
 ULTIMATE_VERSION=13
 
+# Ensure InstallMode and DebugMode are set, defaulting to 0 if unset
+InstallMode=${InstallMode:-0}
+DebugMode=${DebugMode:-0}
+
 if [ "$InstallMode" -eq 1 ] || [ "$DebugMode" -eq 1 ]; then
     echo "$1"
 else
@@ -150,7 +154,7 @@ aes=`lscpu | grep "^Flags:.*aes" | wc -l`
         first_mac=$(infoprint $net_interfaces | jq -r .[0].mac | sed 's/://g') #just grab the first in list
 system_uuid=$(infoprint ${system_uuid}-${cpu_id}-${first_mac} | tr '[:upper:]' '[:lower:]' | sha1sum | awk '{print $1}')
 
-echo "$system_uuid" > $localSerialFile
+echo "$system_uuid" > $LOCALSERIALFILE
 
 ## --------------------------------
 
