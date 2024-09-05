@@ -2,7 +2,7 @@
 
 clear
 
-configFileName="ultex"
+configFileName="ultexv2"
 ULTIMATE_VERSION=13
 
 if [ "$InstallMode" -eq 1 ] || [ "$DebugMode" -eq 1 ]; then
