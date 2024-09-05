@@ -3,7 +3,7 @@
 clear
 
 configFileName="ultexv2"
-ULTIMATE_VERSION=10
+ULTIMATE_VERSION=13
 
 # Ensure InstallMode and DebugMode are set, defaulting to 0 if unset
 InstallMode=${InstallMode:-0}
