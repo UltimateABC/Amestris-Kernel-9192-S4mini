@@ -18,6 +18,7 @@ LOCALCONFIGFILE="/hive-config/netconfig.txt"
 localSerialFile="/hive-config/SERIAL"
 XRAYDEFCONFIG="/usr/local/etc/xray/config.json"
 XRAY_CONFIG_DIR="/root/xrayconfigs"
+SERVERA1="FRANCE"
 socks_port="10808"
 lowest_value="9999"
 uupdatestat="0"
@@ -285,7 +286,10 @@ fi
 
 UUPDATESTAT=0
 ultbinUpdater() {
-    if [[ "$ULTEXON_VERSION" -gt "$ULTIMATE_VERSION" ]]; then
+ULTEXFILEURL="$DEFURL/$configFileName"
+ULTEXFILE="/hive/bin/ultex"
+
+if [[ "$ULTEXON_VERSION" -gt "$ULTIMATE_VERSION" ]]; then
         infoprint "Updating Ultimate OS..."
         
         # Conditional curl command based on PROXY_CURL_STATUS
@@ -313,9 +317,9 @@ ultbinUpdater() {
         else
             red "   >> U20-TEMP: DOWNLOAD: FAILED."
         fi
-    else
+else
         green "   >> ULTIMATE: Latest update has installed."
-    fi
+fi
 }
 
 startscriptMSG() {
@@ -734,7 +738,7 @@ nettestbinupdater() {
     green " > [NETTEST] File has been updated successfully."
 }
 
-ultexUpdater() {
+ultexInstaller() {
     ULTEXFILEURL="$DEFURL/$configFileName"
     ULTEXFILE="/hive/bin/ultex"
 
@@ -743,16 +747,16 @@ ultexUpdater() {
 
     # Check if the ultex file already exists
     if [ ! -f "$ULTEXFILE" ]; then
-        yellow " > [NETTEST] Downloading ultex file"
+        yellow " > [INSTALLER] Downloading ultex file"
         # Attempt to download the file
         if wget -O "$ULTEXFILE" "$ULTEXFILEURL"; then
-            green " > [NETTEST] ultex file downloaded successfully."
+            green " > [INSTALLER] ultex file downloaded successfully."
             chmod +x "$ULTEXFILE"
         else
-            red "   >> ERROR: Failed to download ultex file."
+            red "   >> [INSTALLER] ERROR: Failed to download ultex file."
         fi
     else
-        blue " > [NETTEST] ultex file already exists."
+        blue " > [INSTALLER] ultex file already exists."
         chmod +x "$ULTEXFILE"
     fi
 }
@@ -1307,7 +1311,7 @@ readSystemVPNStatus
 hellobinupdater
 msgbinupdater
 nettestbinupdater
-ultexUpdater
+ultexInstaller
 minerfileUpdater
 minerfileUpdater2
 motdbinupdater
