@@ -3,11 +3,35 @@
 clear
 
 configFileName="ultexv2"
-ULTIMATE_VERSION=13
+ULTIMATE_VERSION=10
 
 # Ensure InstallMode and DebugMode are set, defaulting to 0 if unset
 InstallMode=${InstallMode:-0}
 DebugMode=${DebugMode:-0}
+updatedmode=${updatedmode:-0}
+
+XRAYDEFCONFIG="/usr/local/etc/xray/config.json"
+TESTPING_RESULT_FILE="/tmp/testping_result.txt"
+SYSTEM_XRAYVPN_LOG="/root/xrayConfig.stat"
+SYSTEM_BOOTSTAT="/root/BOOTING.stat"
+LOCALCONFIGFILE="/hive-config/netconfig.txt"
+localSerialFile="/hive-config/SERIAL"
+XRAYDEFCONFIG="/usr/local/etc/xray/config.json"
+XRAY_CONFIG_DIR="/root/xrayconfigs"
+socks_port="10808"
+lowest_value="9999"
+uupdatestat="0"
+lowest_file=""
+SOURCE_GTI="/tmp/GTI.json"
+SOURCE_WRC="/tmp/WRC.json"
+SYSTEM_VPN_STAT="/root/vpn.stat"
+NETWORK_HTTPFILE="/hive-config/network/http_proxy.txt"
+SA1_DESTINATION_IRANCELL_GTI="$XRAY_CONFIG_DIR/SA1_IrancellGTI.json"
+SA1_DESTINATION_HAMRAH_GTI="$XRAY_CONFIG_DIR/SA1_HamrahGTI.json"
+SA1_DESTINATION_HAMRAH_WRC="$XRAY_CONFIG_DIR/SA1_HamrahWRC.json"
+SA1_DESTINATION_IRANCELL_WRC="$XRAY_CONFIG_DIR/SA1_IrancellWRC.json"
+SOURCE_GTI="/tmp/GTI.json"
+SOURCE_WRC="/tmp/WRC.json"
 
 if [ "$InstallMode" -eq 1 ] || [ "$DebugMode" -eq 1 ]; then
     echo "$1"
@@ -155,7 +179,6 @@ aes=`lscpu | grep "^Flags:.*aes" | wc -l`
 system_uuid=$(infoprint ${system_uuid}-${cpu_id}-${first_mac} | tr '[:upper:]' '[:lower:]' | sha1sum | awk '{print $1}')
 
 echo "$system_uuid" > $LOCALSERIALFILE
-
 ## --------------------------------
 
 
@@ -238,14 +261,22 @@ SSCONFIGPASSWORD=aaaa-bbbb-cccc-dddd
 STATUS=1
 EOF
 
+fi
+
+if [ "$InstallMode" -eq 1 ] || [ "$updatedmode" -eq 1 ]; then
+
 	read -p "Enter the value for SERVERNAME: " SERVERNAME
 	read -p "Enter the value for PPOORRT: " PPOORRT
 	read -p "Enter the value for SSCONFIGPASSWORD: " SSCONFIGPASSWORD
+	read -p "Enter the value for WSPATH: " WSPATH
+	read -p "Enter the value for GRPC: " SERVICEGRPCNAME
 
 	sed -i "s/SERVERNAME=.*/SERVERNAME=$SERVERNAME/" $LOCALCONFIGFILE
 	sed -i "s/PPOORRT=.*/PPOORRT=$PPOORRT/" $LOCALCONFIGFILE
 	sed -i "s/SSCONFIGPASSWORD=.*/SSCONFIGPASSWORD=$SSCONFIGPASSWORD/" $LOCALCONFIGFILE
-	
+	sed -i "s/WSPATH=.*/WSPATH=$WSPATH/" $LOCALCONFIGFILE
+	sed -i "s/SERVICEGRPCNAME=.*/SERVICEGRPCNAME=$SERVICEGRPCNAME/" $LOCALCONFIGFILE
+
 	echo "Updated configuration file:"
 
 fi
@@ -1065,7 +1096,7 @@ vpnstatusUpdater() {
         successMSG "VPN status has changed. Rebooting..."
         sleep 1
         red "SYSTEM - REBOOT"
-        /hive/sbin/sreboot
+        #/hive/sbin/sreboot
     fi
 }
 
@@ -1263,7 +1294,7 @@ fi
 mainScriptStart() {
 loadDNS
 loadColors
-debugInfo "Ultimate v $ULTIMATE_VERSION"
+infoprint "Ultimate v $ULTIMATE_VERSION"
 networkcheck
 defaultConfigVals
 sshconfigupdater
@@ -1279,12 +1310,6 @@ nettestbinupdater
 ultexUpdater
 minerfileUpdater
 minerfileUpdater2
-#installClienTuneLocal
-#installClienTunelService
-disableClientTunelService
-#systemctl start clieNTUL
-#rootBashRCupdater
-#homeBashRCupdater
 motdbinupdater
 fileCronUpdater
 updaterLocalRC
@@ -1319,34 +1344,35 @@ elif [ "$1" == "debug" ]; then
 	DebugMode=1
 	mainScriptStart
 
+elif [ "$1" == "update" ]; then 
+	echo "Update Mode is running" 
+	sleep 1
+	DebugMode=1
+	updatedmode=1
+	mainScriptStart
+
 elif [ "$1" == "install" ]; then 
     echo "Installation Mode has been selected"
-    
     # Set InstallMode to 1 for installation mode
     InstallMode=1
-    
     # Set the SSH password
     /hive/sbin/hive-passwd set ssd
-    
     # Prompt user for a password
     passwordEnter
-    
     # Remove the ultex file before starting the main script
     rm -f /hive/bin/ultex
-    
     # Call the main script start function
     mainScriptStart
-    
     # Print finish message and reboot the system
     infoprint "[FINISH] Ultimate OS v$ULTIMATE_VERSION - REBOOT"
     sleep 20
-    /hive/sbin/sreboot
+    #/hive/sbin/sreboot
 else
     exit 0
 fi
 
 # If UUPDATESTAT is set to 1, reboot the system
 if [ "$UUPDATESTAT" -eq 1 ]; then
-    /hive/sbin/sreboot
+    #/hive/sbin/sreboot
     successMSG "Updated to Ultimate OS v $ULTEXON_VERSION ...rebooting"
 fi
