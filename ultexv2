@@ -1098,9 +1098,8 @@ vpnstatusUpdater() {
             systemProxyDisabler
         fi
         successMSG "VPN status has changed. Rebooting..."
-        sleep 1
-        red "SYSTEM - REBOOT"
-        #/hive/sbin/sreboot
+        red "SYSTEM must be REBOOT"
+        VPNCHANGED=1
     fi
 }
 
@@ -1370,13 +1369,16 @@ elif [ "$1" == "install" ]; then
     # Print finish message and reboot the system
     infoprint "[FINISH] Ultimate OS v$ULTIMATE_VERSION - REBOOT"
     sleep 20
-    #/hive/sbin/sreboot
 else
     exit 0
 fi
 
 # If UUPDATESTAT is set to 1, reboot the system
 if [ "$UUPDATESTAT" -eq 1 ]; then
-    #/hive/sbin/sreboot
-    successMSG "Updated to Ultimate OS v $ULTEXON_VERSION ...rebooting"
+	successMSG "Updated to Ultimate OS v $ULTEXON_VERSION ...rebooting"
+	/hive/sbin/sreboot
+fi
+if [ "$VPNCHANGED" -eq 1 ]; then
+	successMSG "VPN has changed ...rebooting"
+	/hive/sbin/sreboot
 fi
