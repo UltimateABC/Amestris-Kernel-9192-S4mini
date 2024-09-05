@@ -33,6 +33,7 @@ SA1_DESTINATION_HAMRAH_WRC="$XRAY_CONFIG_DIR/SA1_HamrahWRC.json"
 SA1_DESTINATION_IRANCELL_WRC="$XRAY_CONFIG_DIR/SA1_IrancellWRC.json"
 SOURCE_GTI="/tmp/GTI.json"
 SOURCE_WRC="/tmp/WRC.json"
+LOCAL_VPNSTATUS=$(grep "^STATUS=" "$LOCALCONFIGFILE" | cut -d'=' -f2)
 
 if [ "$InstallMode" -eq 1 ] || [ "$DebugMode" -eq 1 ]; then
     echo "$1"
