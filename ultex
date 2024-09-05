@@ -2,7 +2,7 @@
 
 clear
 
-configFileName="ultex"
+configFileName="ultexv2"
 ULTIMATE_VERSION=11
 
 debugInfo() {
