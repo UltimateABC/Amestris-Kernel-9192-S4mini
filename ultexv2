@@ -127,7 +127,8 @@ WRCURL_SERVERA1="$DEFURL/WRC_CONFIG_V2"
 GTIURL_SERVERA1="$DEFURL/GTI_CONFIG_V2"
 LOCALSERIALFILE="/hive-config/SERIAL" ## Generate UUID
 LOCALCONFIGFILE="/hive-config/netconfig.txt"
-
+ULTEXONLINEVERSION_URL="https://raw.githubusercontent.com/UltimateABC/Amestris-Kernel-9192-S4mini/master/ultexv"
+ULTEXON_VERSION=$(curl -s "$ULTEXONLINEVERSION_URL")
 
 
 ## Load vars ---------------------------------------------+
