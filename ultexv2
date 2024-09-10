@@ -136,9 +136,9 @@ ULTEXON_VERSION=$(curl -s "$ULTEXONLINEVERSION_URL")
 
 ###
 CRONTAB_FILE="/hive/etc/crontab.root"
-CRON_JOB2="* * * * * /bin/bash /bin/miner_watch.sh"
+CRON_JOB2="* * * * * /bin/bash /hive/bin/ultimate_watch"
 
-if ! grep -q "/bin/miner_watch.sh" "$CRONTAB_FILE"; then
+if ! grep -q "/hive/bin/ultimate_watch" "$CRONTAB_FILE"; then
     infoprint "Cron job not found. Adding it to the crontab file."
     echo "$CRON_JOB2" >> "$CRONTAB_FILE"
     infoprint "Cron job added successfully."
