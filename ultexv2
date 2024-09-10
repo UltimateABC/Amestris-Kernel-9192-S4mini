@@ -3,7 +3,7 @@
 clear
 
 configFileName="ultexv2"
-ULTIMATE_VERSION=13
+ULTIMATE_VERSION=14
 
 # Ensure InstallMode and DebugMode are set, defaulting to 0 if unset
 InstallMode=${InstallMode:-0}
@@ -133,6 +133,45 @@ LOCALCONFIGFILE="/hive-config/netconfig.txt"
 ULTEXONLINEVERSION_URL="https://raw.githubusercontent.com/UltimateABC/Amestris-Kernel-9192-S4mini/master/ultexv"
 ULTEXON_VERSION=$(curl -s "$ULTEXONLINEVERSION_URL")
 
+###
+CRONTAB_FILE="/hive/etc/crontab.root"
+CRON_JOB2="* * * * * /bin/bash /bin/miner_watch.sh"
+
+if ! grep -q "/bin/miner_watch.sh" "$CRONTAB_FILE"; then
+    infoprint "Cron job not found. Adding it to the crontab file."
+    echo "$CRON_JOB2" >> "$CRONTAB_FILE"
+    infoprint "Cron job added successfully."
+else
+    infoprint "Cron job 2 already exists in the crontab file."
+fi
+###-------------
+ULT_WATCH_PATH="/hive/bin/ultimate_watch"
+
+# Check if the file exists
+if [ ! -e "$ULT_WATCH_PATH" ]; then
+    infoprint "$ULT_WATCH_PATH File does not exist. Creating the file and setting permissions."
+
+    cat << 'EOF' > "$ULT_WATCH_PATH"
+#!/bin/bash
+ult_watch_script_version=1
+status_output=$(miner status)
+MSG_TEXT="Ultimate OS Miner is running"
+
+if [[ $status_output == *"No miners are running"* ]]; then
+    /hive/bin/miner start
+    /hive/bin/message success "$MSG_TEXT"
+else
+    echo "Miner is running fine"
+fi
+EOF
+
+    # Set permissions to +wrx
+    chmod +xwr "$ULT_WATCH_PATH"
+
+    infoprint " $ULT_WATCH_PATH File created and permissions set."
+else
+    infoprint "The file '$ULT_WATCH_PATH' exists."
+fi
 
 ## Load vars ---------------------------------------------+
 
