@@ -11,6 +11,7 @@ DebugMode=${DebugMode:-0}
 updatedmode=${updatedmode:-0}
 VPNCHANGED=0
 UUPDATESTAT=0
+debug=0
 
 XRAYDEFCONFIG="/usr/local/etc/xray/config.json"
 TESTPING_RESULT_FILE="/tmp/testping_result.txt"
