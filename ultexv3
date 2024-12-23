@@ -1360,8 +1360,6 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo "$CHECK_ACC_PY_FILE_PATH executed successfully."
-
 }
 
 
