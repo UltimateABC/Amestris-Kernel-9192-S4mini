@@ -5,7 +5,7 @@ clear
 configFileName="ultexv3"
 ## MOVE to Version 3
 
-ULTIMATE_VERSION=15
+ULTIMATE_VERSION=16
 
 # Ensure InstallMode and DebugMode are set, defaulting to 0 if unset
 InstallMode=${InstallMode:-0}
