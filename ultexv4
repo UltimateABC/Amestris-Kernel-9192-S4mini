@@ -1421,41 +1421,47 @@ successMSG "Ultimate OS v $ULTIMATE_VERSION has Started"
 if [ $# -eq 0 ]; then
     echo " [START] Ultimate OS v$ULTIMATE_VERSION"
 
-    # Ensure InstallMode is set to 0 if not already defined
-    if [[ -z "$InstallMode" || ! "$InstallMode" =~ ^[0-9]+$ ]]; then
+    # Ensure InstallMode and DebugMode are set to defaults if not defined
+    InstallMode=${InstallMode:-0}
+    DebugMode=${DebugMode:-0}
+
+    # Validate InstallMode and DebugMode to be integers
+    if ! [[ "$InstallMode" =~ ^[0-9]+$ ]]; then
         InstallMode=0
     fi
-	
-	if [[ -z "$DebugMode" || ! "$DebugMode" =~ ^[0-9]+$ ]]; then
+    if ! [[ "$DebugMode" =~ ^[0-9]+$ ]]; then
         DebugMode=0
     fi
-    
+
     # Call the main script start function
     mainScriptStart
 
 elif [ "$1" == "debug" ]; then 
-	DebugMode=1
-	mainScriptStart
+    DebugMode=1
+    mainScriptStart
 
 elif [ "$1" == "update" ]; then 
-	echo "Update Mode is running" 
-	sleep 1
-	DebugMode=1
-	updatedmode=1
-	mainScriptStart
+    echo "Update Mode is running" 
+    DebugMode=1
+    updatedmode=1
+    mainScriptStart
 
 elif [ "$1" == "install" ]; then 
     echo "Installation Mode has been selected"
+    
     # Set InstallMode to 1 for installation mode
     InstallMode=1
-    # Set the SSH password
+    
+    # Set the SSH password and prompt user for a password
     /hive/sbin/hive-passwd set ssd
-    # Prompt user for a password
     passwordEnter
+    
     # Remove the ultex file before starting the main script
     rm -f /hive/bin/ultex
+    
     # Call the main script start function
     mainScriptStart
+    
     # Print finish message and reboot the system
     infoprint "[FINISH] Ultimate OS v$ULTIMATE_VERSION - REBOOT"
     sleep 20
@@ -1463,12 +1469,21 @@ else
     exit 0
 fi
 
-# If UUPDATESTAT is set to 1, reboot the system
+
+# Function to handle system reboot with a success message
+reboot_system() {
+    local message="$1"
+    successMSG "$message"
+    /hive/sbin/sreboot
+}
+
+# Check if UUPDATESTAT is set to 1 and reboot
 if [ "$UUPDATESTAT" -eq 1 ]; then
-	successMSG "Updated to Ultimate OS v $ULTEXON_VERSION ...rebooting"
-	/hive/sbin/sreboot
+    reboot_system "Updated to Ultimate OS v $ULTEXON_VERSION ...rebooting"
 fi
+
+# Check if VPNCHANGED is set to 1 and reboot
 if [ "$VPNCHANGED" -eq 1 ]; then
-	successMSG "VPN has changed ...rebooting"
-	/hive/sbin/sreboot
+    reboot_system "VPN has changed ...rebooting"
 fi
+
