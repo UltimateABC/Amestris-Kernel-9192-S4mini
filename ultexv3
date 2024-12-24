@@ -2,7 +2,7 @@
 
 clear
 
-configFileName="ultexv3"
+configFileName="ultexv4"
 ULTIMATE_VERSION=17
 
 # Ensure InstallMode and DebugMode are set, defaulting to 0 if unset
