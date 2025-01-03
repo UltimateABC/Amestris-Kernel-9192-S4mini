@@ -4,7 +4,7 @@ import requests
 from urllib.parse import unquote
 import argparse
 
-""" CODENAME KLS21SQAE """
+""" CODENAME N3V3RM0R3 """
 
 def extract_uuid(file_path, debug=False):
     """Extract the UUID from the specified file."""
