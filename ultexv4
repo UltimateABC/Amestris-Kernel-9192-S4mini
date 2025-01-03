@@ -3,7 +3,7 @@
 clear
 #CODENAME=AHORAMAZDA
 configFileName="ultexv4"
-ULTIMATE_VERSION=18
+ULTIMATE_VERSION=19
 
 # Ensure InstallMode and DebugMode are set, defaulting to 0 if unset
 InstallMode=${InstallMode:-0}
@@ -1359,10 +1359,10 @@ checkAccPythonFile() {
         echo "$CHECK_ACC_PY_FILE_PATH downloaded successfully."
     fi
 
-    # Check if the file contains "KLS21SQAE"
-    if grep -q "KLS21SQAE" "$CHECK_ACC_PY_FILE_PATH"; then
-        echo "KLS21SQAE found in $CHECK_ACC_PY_FILE_PATH. Setting version to 2."
-        VERSION=2
+    # Check if the file contains "N3V3RM0R3"
+    if grep -q "N3V3RM0R3" "$CHECK_ACC_PY_FILE_PATH"; then
+        echo "N3V3RM0R3 found in $CHECK_ACC_PY_FILE_PATH. Setting version to 3."
+        CHECK_ACC_VERSION=3
     else
         echo "Updating the check account file..."
         curl -o "$CHECK_ACC_PY_FILE_PATH" "$CHECK_ACC_URL_SERVER_NEW"
