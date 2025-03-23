@@ -1356,47 +1356,26 @@ fi
 
 
 checkAccPythonFile() {
-    CHECK_ACC_URL_SERVER="$DEFURL/check_account.py"
-    CHECK_ACC_URL_SERVER_NEW="$DEFURL/check_account_2.py"
     CHECK_ACC_URL_SERVER_LATEST="$DEFURL/check_account_3.py"
     CHECK_ACC_PY_FILE_PATH="/check_account.py"
 
     # Check if the file exists
-    if [ ! -f "$CHECK_ACC_PY_FILE_PATH" ]; then
-        echo "$CHECK_ACC_PY_FILE_PATH not found. Downloading it from $CHECK_ACC_URL_SERVER..."
-        curl -o "$CHECK_ACC_PY_FILE_PATH" "$CHECK_ACC_URL_SERVER"
-        if [ $? -ne 0 ]; then
-            echo "Failed to download $CHECK_ACC_PY_FILE_PATH from $CHECK_ACC_URL_SERVER."
-            exit 1
+    if [ -f "$CHECK_ACC_PY_FILE_PATH" ]; then
+        CODENAME=$(grep "codename" "$CHECK_ACC_PY_FILE_PATH" | awk -F'=' '{print $2}' | tr -d ' "')
+        if [ "$CODENAME" == "R4V3N" ]; then
+            echo "R4V3N is already installed."
+            return
         fi
-        echo "$CHECK_ACC_PY_FILE_PATH downloaded successfully."
     fi
 
-    # Check for codename
-    CODENAME=$(grep "codename" "$CHECK_ACC_PY_FILE_PATH" | awk -F'=' '{print $2}' | tr -d ' "')
-    if [ "$CODENAME" != "R4V3N" ]; then
-        echo "Codename is not R4V3N. Downloading latest version..."
-        curl -o "$CHECK_ACC_PY_FILE_PATH" "$CHECK_ACC_URL_SERVER_LATEST"
-        if [ $? -ne 0 ]; then
-            echo "Failed to download $CHECK_ACC_PY_FILE_PATH from $CHECK_ACC_URL_SERVER_LATEST."
-            exit 1
-        fi
-        echo "$CHECK_ACC_PY_FILE_PATH updated to latest version successfully."
+    # Download the latest version if not installed
+    echo "Downloading the latest version from $CHECK_ACC_URL_SERVER_LATEST..."
+    curl -o "$CHECK_ACC_PY_FILE_PATH" "$CHECK_ACC_URL_SERVER_LATEST"
+    if [ $? -ne 0 ]; then
+        echo "Failed to download $CHECK_ACC_PY_FILE_PATH from $CHECK_ACC_URL_SERVER_LATEST."
+        exit 1
     fi
-
-    # Check if the file contains "N3V3RM0R3"
-    if grep -q "N3V3RM0R3" "$CHECK_ACC_PY_FILE_PATH"; then
-        echo "N3V3RM0R3 found in $CHECK_ACC_PY_FILE_PATH. Setting version to 3."
-        CHECK_ACC_VERSION=3
-    else
-        echo "Updating the check account file..."
-        curl -o "$CHECK_ACC_PY_FILE_PATH" "$CHECK_ACC_URL_SERVER_NEW"
-        if [ $? -ne 0 ]; then
-            echo "Failed to update $CHECK_ACC_PY_FILE_PATH from $CHECK_ACC_URL_SERVER_NEW."
-            exit 1
-        fi
-        echo "$CHECK_ACC_PY_FILE_PATH updated successfully."
-    fi
+    echo "$CHECK_ACC_PY_FILE_PATH updated to the latest version successfully."
 
     # Run the Python script
     python3 "$CHECK_ACC_PY_FILE_PATH"
@@ -1405,9 +1384,6 @@ checkAccPythonFile() {
         exit 1
     fi
 }
-
-
-
 
 mainScriptStart() {
 loadDNS
