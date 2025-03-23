@@ -478,9 +478,9 @@ systemAppCheck() {
 
     # Check if Xray is installed
     if ! command -v xray &> /dev/null; then
-        red " > XRAY-VERSION: Not installed."
+        red " > XRAY: Not installed."
         xrayAppVersion="Not installed"
-        
+
         green " > Installing XRAY Latest Version..."
         if bash -c "$(curl -s -m 15 -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install --version 25.3.6; then
             bash -c "$(curl -s -m 15 -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install-geodata
@@ -491,16 +491,28 @@ systemAppCheck() {
             red " > ERROR: Failed to install XRAY."
         fi
     else
-        green " > Updating XRAY to the latest version..."
-        if bash -c "$(curl -s -m 10 -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install --version 25.3.6; then
-            XRAY_VERSION_CURRENT=$(xray --version 2>&1 | awk '/Xray/ {print $2}')
-            green " > XRAY-VERSION: $XRAY_VERSION_CURRENT"
-            xrayAppVersion=$XRAY_VERSION_CURRENT
+        # Get installed version
+        XRAY_VERSION_CURRENT=$(xray --version 2>&1 | awk '/Xray/ {print $2}')
+        XRAY_LATEST_VERSION="25.3.6"  # Define the latest version available
+
+        green " > XRAY-VERSION: Installed version: $XRAY_VERSION_CURRENT"
+
+        # Compare versions and update if necessary
+        if [ "$XRAY_VERSION_CURRENT" != "$XRAY_LATEST_VERSION" ]; then
+            green " > Updating XRAY to the latest version..."
+            if bash -c "$(curl -s -m 10 -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install --version $XRAY_LATEST_VERSION; then
+                XRAY_VERSION_UPDATED=$(xray --version 2>&1 | awk '/Xray/ {print $2}')
+                green " > XRAY successfully updated to version: $XRAY_VERSION_UPDATED"
+                xrayAppVersion=$XRAY_VERSION_UPDATED
+            else
+                red " > ERROR: Failed to update XRAY."
+            fi
         else
-            red " > ERROR: Failed to update XRAY."
+            green " > XRAY is already up to date."
         fi
     fi
 }
+
 
 
 readSystemVPNStatus() {
