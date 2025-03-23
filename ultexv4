@@ -1,6 +1,7 @@
 #!/bin/bash
 
 clear
+#ORIGINAL_V4
 #CODENAME=XEREX
 configFileName="ultexv5"
 ULTIMATE_VERSION=20
